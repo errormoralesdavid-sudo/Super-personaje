@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creador de Héroes & Subasta ⚡</title>
+    <title>Creador & Subasta de Héroes ⚡</title>
     <style>
         * {
             box-sizing: border-box;
@@ -31,7 +31,7 @@
             text-shadow: 0 0 10px #7928ca;
         }
 
-        /* Panel de Presupuesto y Apuestas */
+        /* Panel de Presupuesto */
         .wallet-panel {
             display: flex;
             justify-content: space-between;
@@ -136,7 +136,7 @@
             pointer-events: none;
         }
 
-        /* Botón Ruleta Principal */
+        /* Botones */
         .btn-spin {
             width: 100%;
             background: linear-gradient(45deg, #ff007f, #7928ca);
@@ -151,7 +151,7 @@
             margin-bottom: 15px;
         }
 
-        /* Modal / Panel de Subasta */
+        /* Modal Subasta */
         .auction-modal {
             display: none;
             position: fixed;
@@ -221,7 +221,6 @@
         .btn-assign-j2 { background: #ff007f; color: white; }
         .btn-discard { background: #444; color: #ccc; width: 100%; padding: 8px; margin-top: 5px; border-radius: 8px; border:none; }
 
-        /* Lista de poderes y copia */
         .powers-card {
             background: #121222;
             border-radius: 15px;
@@ -311,7 +310,27 @@
         }
 
         .controls-grid div { display: flex; flex-direction: column; }
+        
+        .btn-save-item {
+            width: 100%;
+            background: #00e676;
+            color: #000;
+            font-weight: bold;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 15px;
+        }
+
         .btn-close-admin { background: #ff0055; color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 12px; cursor: pointer; }
+
+        .saved-count {
+            font-size: 12px;
+            color: #00f2fe;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -319,7 +338,7 @@
 <div class="container">
     <h1>⚡ Creador & Subasta de Héroes ⚡</h1>
     
-    <!-- Marcador de Fondos de los Jugadores -->
+    <!-- Marcador de Fondos -->
     <div class="wallet-panel">
         <div class="wallet-card">
             <span id="labelJ1">Jugador 1</span>
@@ -342,9 +361,9 @@
 
     <!-- Escenario del Personaje -->
     <div class="character-stage">
-        <div id="heroTitle" class="hero-title">DAVID</div>
+        <div id="heroTitle" class="hero-title">JUGADOR 1</div>
 
-        <!-- Capas de Objetos -->
+        <!-- Capas de Objetos Vista Prévia -->
         <img id="item-aura" class="custom-item" alt="Aura">
         <img id="item-cabeza" class="custom-item" alt="Cabeza">
         <img id="item-manoder" class="custom-item" alt="Mano Derecha">
@@ -401,19 +420,13 @@
 
 <!-- Panel de Administración Oculto -->
 <div id="adminPanel" class="admin-panel">
-    <h3>⚙️ Panel Admin de Posicionamiento <button class="btn-close-admin" onclick="toggleAdmin()">X</button></h3>
+    <h3>⚙️ Panel Admin / Crear Nuevos Objetos <button class="btn-close-admin" onclick="toggleAdmin()">X</button></h3>
     
-    <div class="admin-group">
-        <label>Ajustar Dinero Inicial Jugadores ($):</label>
-        <div style="display: flex; gap: 10px;">
-            <input type="number" id="initMoneyP1" value="100" placeholder="P1" onchange="ajustarDineroDirecto(0, this.value)">
-            <input type="number" id="initMoneyP2" value="100" placeholder="P2" onchange="ajustarDineroDirecto(1, this.value)">
-        </div>
-    </div>
+    <div class="saved-count" id="savedCountLabel">📦 Objetos Creados en la Ruleta: 0</div>
 
-    <div class="admin-group">
-        <label>1. Selecciona la Capa / Ranura:</label>
-        <select id="selectSlot" onchange="cargarConfiguracion()">
+    <div class="admin-group" style="margin-top:10px;">
+        <label>1. Selecciona la Ranura / Capa:</label>
+        <select id="selectSlot">
             <option value="item-espalda">🪽 Espalda / Alas</option>
             <option value="item-aura">🔥 Aura / Fondo</option>
             <option value="item-cabeza">🪖 Cabeza / Máscara / Ojos</option>
@@ -423,53 +436,50 @@
     </div>
 
     <div class="admin-group">
-        <label>2. Nombre Personalizado del Poder (Bueno o Castigo):</label>
-        <input type="text" id="powerCustomName" placeholder="Ej: Alas Divinas / o Maldición" oninput="guardarNombrePoder()">
+        <label>2. Nombre del Objeto / Poder:</label>
+        <input type="text" id="powerCustomName" placeholder="Ej: Alas de Ángel Divinas">
     </div>
 
     <div class="admin-group">
         <label>3. Cargar Imagen desde el Teléfono (PNG Transparente):</label>
-        <input type="file" accept="image/*" onchange="cargarImagenSlot(event)">
+        <input type="file" id="itemFileInput" accept="image/*" onchange="previewImagenSlot(event)">
     </div>
 
     <div class="controls-grid">
         <div>
             <label>Posición Horizontal (X):</label>
-            <input type="range" id="posX" min="0" max="250" value="100" oninput="ajustarPosicion()">
+            <input type="range" id="posX" min="0" max="250" value="50" oninput="ajustarPosicionPreview()">
         </div>
         <div>
             <label>Posición Vertical (Y):</label>
-            <input type="range" id="posY" min="0" max="300" value="100" oninput="ajustarPosicion()">
+            <input type="range" id="posY" min="0" max="300" value="70" oninput="ajustarPosicionPreview()">
         </div>
         <div>
             <label>Tamaño / Ancho (px):</label>
-            <input type="range" id="sizeW" min="20" max="320" value="80" oninput="ajustarPosicion()">
+            <input type="range" id="sizeW" min="20" max="320" value="200" oninput="ajustarPosicionPreview()">
         </div>
         <div>
             <label>Profundidad (Z-Index):</label>
-            <input type="range" id="posZ" min="1" max="20" value="10" oninput="ajustarPosicion()">
+            <input type="range" id="posZ" min="1" max="20" value="1" oninput="ajustarPosicionPreview()">
         </div>
     </div>
+
+    <button class="btn-save-item" onclick="guardarNuevoObjeto()">💾 GUARDAR OBJETO EN LA RULETA</button>
 </div>
 
 <script>
-    // Datos de los 2 Jugadores
+    // Banco de Objetos Guardados (Cargado desde el teléfono si existe)
+    let bancoObjetos = JSON.parse(localStorage.getItem('banco_objetos_heroes')) || [];
+
+    // Datos de Jugadores
     let jugadores = [
-        { nombre: "David", dinero: 100, poderesEquipados: [], imagenes: {} },
-        { nombre: "Pareja", dinero: 100, poderesEquipados: [], imagenes: {} }
+        { nombre: "Jugador 1", dinero: 100, poderesEquipados: [] },
+        { nombre: "Jugador 2", dinero: 100, poderesEquipados: [] }
     ];
 
     let jugadorActual = 0;
     let objetoEnSubasta = null;
-
-    // Configuración general de capas
-    let configCapas = {
-        'item-espalda': { x: 50, y: 70, w: 200, z: 1, nombre: "🪽 Alas Místicas" },
-        'item-aura': { x: 20, y: 20, w: 260, z: 2, nombre: "🔥 Aura Infinito / Maldición" },
-        'item-cabeza': { x: 115, y: 55, w: 70, z: 15, nombre: "🪖 Máscara de Poder / Casco Pesado" },
-        'item-manoder': { x: 195, y: 150, w: 50, z: 12, nombre: "💎 Guantelete / Grilletes" },
-        'item-manoizq': { x: 45, y: 140, w: 50, z: 12, nombre: "⚔️ Espada Legendaria / Escudo Roto" }
-    };
+    let tempImageData = null;
 
     function cambiarJugador(index) {
         jugadorActual = index;
@@ -491,7 +501,6 @@
         jugadores[jugadorActual].nombre = nombre || `Jugador ${jugadorActual + 1}`;
         document.getElementById('heroTitle').innerText = jugadores[jugadorActual].nombre.toUpperCase();
         
-        // Actualizar nombres en panel de dinero
         document.getElementById('labelJ1').innerText = jugadores[0].nombre;
         document.getElementById('labelJ2').innerText = jugadores[1].nombre;
     }
@@ -501,22 +510,93 @@
         document.getElementById('moneyJ2').innerText = `$${jugadores[1].dinero}`;
     }
 
-    function ajustarDineroDirecto(jIndex, val) {
-        jugadores[jIndex].dinero = parseInt(val) || 0;
-        actualizarDineroPantalla();
+    function previewImagenSlot(event) {
+        const slotId = document.getElementById('selectSlot').value;
+        const file = event.target.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempImageData = e.target.result;
+                const imgEl = document.getElementById(slotId);
+                imgEl.src = tempImageData;
+                imgEl.style.display = 'block';
+                ajustarPosicionPreview();
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function ajustarPosicionPreview() {
+        const slotId = document.getElementById('selectSlot').value;
+        const imgEl = document.getElementById(slotId);
+        
+        imgEl.style.left = document.getElementById('posX').value + 'px';
+        imgEl.style.top = document.getElementById('posY').value + 'px';
+        imgEl.style.width = document.getElementById('sizeW').value + 'px';
+        imgEl.style.zIndex = document.getElementById('posZ').value;
+    }
+
+    function guardarNuevoObjeto() {
+        const slotId = document.getElementById('selectSlot').value;
+        const nombre = document.getElementById('powerCustomName').value.trim();
+
+        if(!nombre) {
+            alert("¡Por favor escribe un nombre para el objeto!");
+            return;
+        }
+
+        if(!tempImageData) {
+            alert("¡Por favor selecciona una imagen primero!");
+            return;
+        }
+
+        const nuevoObjeto = {
+            id: Date.now(),
+            slot: slotId,
+            nombre: nombre,
+            imagen: tempImageData,
+            x: document.getElementById('posX').value,
+            y: document.getElementById('posY').value,
+            w: document.getElementById('sizeW').value,
+            z: document.getElementById('posZ').value
+        };
+
+        bancoObjetos.push(nuevoObjeto);
+        
+        // Guardar en la memoria local del celular
+        try {
+            localStorage.setItem('banco_objetos_heroes', JSON.stringify(bancoObjetos));
+        } catch(e) {
+            console.log("Storage lleno o restringido");
+        }
+
+        actualizarConteoObjetos();
+        alert(`¡ Objeto "${nombre}" guardado con éxito en la Ruleta!`);
+
+        // Resetear campos de texto
+        document.getElementById('powerCustomName').value = '';
+        document.getElementById('itemFileInput').value = '';
+        tempImageData = null;
+        refrescarVisualesPersonaje();
+    }
+
+    function actualizarConteoObjetos() {
+        document.getElementById('savedCountLabel').innerText = `📦 Objetos Creados en la Ruleta: ${bancoObjetos.length}`;
     }
 
     function sacarObjetoASubasta() {
-        const slotsDisponibles = Object.keys(configCapas);
-        const slotElegido = slotsDisponibles[Math.floor(Math.random() * slotsDisponibles.length)];
+        if (bancoObjetos.length === 0) {
+            alert("¡No hay objetos creados en la ruleta! Toca la esquina inferior izquierda para crear y guardar objetos primero.");
+            toggleAdmin();
+            return;
+        }
 
-        objetoEnSubasta = {
-            slot: slotElegido,
-            nombre: configCapas[slotElegido].nombre
-        };
+        const indiceAleatorio = Math.floor(Math.random() * bancoObjetos.length);
+        objetoEnSubasta = bancoObjetos[indiceAleatorio];
 
         document.getElementById('auctionItemName').innerText = objetoEnSubasta.nombre;
-        document.getElementById('finalBidAmount').value = 5; // apuesta por defecto
+        document.getElementById('finalBidAmount').value = 5;
         document.getElementById('auctionModal').style.display = 'flex';
     }
 
@@ -524,22 +604,19 @@
         const costo = parseInt(document.getElementById('finalBidAmount').value) || 0;
         
         if (jugadores[ganadorIndex].dinero < costo) {
-            alert(`¡${jugadores[ganadorIndex].nombre} no tiene suficiente dinero para pagar $${costo}!`);
+            alert(`¡${jugadores[ganadorIndex].nombre} no tiene suficiente dinero!`);
             return;
         }
 
-        // Restar dinero
         jugadores[ganadorIndex].dinero -= costo;
         actualizarDineroPantalla();
 
-        // Si ya tenía un objeto en esa ranura, reemplazarlo
         const j = jugadores[ganadorIndex];
+        // Reemplazar si ya tiene algo en esa ranura
         j.poderesEquipados = j.poderesEquipados.filter(p => p.slot !== objetoEnSubasta.slot);
         j.poderesEquipados.push(objetoEnSubasta);
 
         cerrarSubasta();
-
-        // Cambiar la vista al jugador que ganó para que vea su objeto
         cambiarJugador(ganadorIndex);
     }
 
@@ -551,80 +628,23 @@
     function toggleAdmin() {
         const panel = document.getElementById('adminPanel');
         panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-        if(panel.style.display === 'block') cargarConfiguracion();
-    }
-
-    function guardarNombrePoder() {
-        const slotId = document.getElementById('selectSlot').value;
-        const nuevoNombre = document.getElementById('powerCustomName').value.trim();
-        if(nuevoNombre) {
-            configCapas[slotId].nombre = nuevoNombre;
-        }
-    }
-
-    function cargarImagenSlot(event) {
-        const slotId = document.getElementById('selectSlot').value;
-        const file = event.target.files[0];
-        
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // Se asigna la imagen globalmente
-                jugadores[0].imagenes[slotId] = e.target.result;
-                jugadores[1].imagenes[slotId] = e.target.result;
-
-                const imgEl = document.getElementById(slotId);
-                imgEl.src = e.target.result;
-                imgEl.style.display = 'block';
-                aplicarEstilosSlot(slotId);
-            }
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function ajustarPosicion() {
-        const slotId = document.getElementById('selectSlot').value;
-        configCapas[slotId].x = document.getElementById('posX').value;
-        configCapas[slotId].y = document.getElementById('posY').value;
-        configCapas[slotId].w = document.getElementById('sizeW').value;
-        configCapas[slotId].z = document.getElementById('posZ').value;
-
-        aplicarEstilosSlot(slotId);
-    }
-
-    function aplicarEstilosSlot(slotId) {
-        const imgEl = document.getElementById(slotId);
-        const cfg = configCapas[slotId];
-        
-        imgEl.style.left = cfg.x + 'px';
-        imgEl.style.top = cfg.y + 'px';
-        imgEl.style.width = cfg.w + 'px';
-        imgEl.style.zIndex = cfg.z;
-    }
-
-    function cargarConfiguracion() {
-        const slotId = document.getElementById('selectSlot').value;
-        const cfg = configCapas[slotId];
-
-        document.getElementById('posX').value = cfg.x;
-        document.getElementById('posY').value = cfg.y;
-        document.getElementById('sizeW').value = cfg.w;
-        document.getElementById('posZ').value = cfg.z;
-        document.getElementById('powerCustomName').value = cfg.nombre;
     }
 
     function refrescarVisualesPersonaje() {
         const j = jugadores[jugadorActual];
-        const slots = Object.keys(configCapas);
+        const slotsPosibles = ['item-espalda', 'item-aura', 'item-cabeza', 'item-manoder', 'item-manoizq'];
 
-        slots.forEach(slot => {
+        slotsPosibles.forEach(slot => {
             const imgEl = document.getElementById(slot);
-            const poseePoder = j.poderesEquipados.some(p => p.slot === slot);
+            const objetoEquipado = j.poderesEquipados.find(p => p.slot === slot);
 
-            if (poseePoder && j.imagenes[slot]) {
-                imgEl.src = j.imagenes[slot];
+            if (objetoEquipado) {
+                imgEl.src = objetoEquipado.imagen;
+                imgEl.style.left = objetoEquipado.x + 'px';
+                imgEl.style.top = objetoEquipado.y + 'px';
+                imgEl.style.width = objetoEquipado.w + 'px';
+                imgEl.style.zIndex = objetoEquipado.z;
                 imgEl.style.display = 'block';
-                aplicarEstilosSlot(slot);
             } else {
                 imgEl.style.display = 'none';
             }
@@ -650,24 +670,25 @@
 
         const promptFinal = `¡Simula una batalla épica paso a paso entre estos dos luchadores y decide quién gana!
 
-Luchador 1: ${j1.nombre} (Presupuesto Restante: $${j1.dinero})
+Luchador 1: ${j1.nombre} (Presupuesto restante: $${j1.dinero})
 Poderes y Objetos Ganados:
 ${lista1}
 
-Luchador 2: ${j2.nombre} (Presupuesto Restante: $${j2.dinero})
+Luchador 2: ${j2.nombre} (Presupuesto restante: $${j2.dinero})
 Poderes y Objetos Ganados:
 ${lista2}
 
-Describe el combate con acción estilo anime. Toma en cuenta tanto sus poderes positivos como cualquier castigo u objeto que hayan ganado en la subasta para determinar al vencedor.`;
+Describe el combate de forma emocionante estilo anime tomando en cuenta las habilidades de los objetos ganados.`;
 
         navigator.clipboard.writeText(promptFinal).then(() => {
-            alert("¡Prompt copiado! Pégalo a la IA para que simule el combate.");
+            alert("¡Prompt copiado! Pégalo a la IA para empezar la batalla.");
         });
     }
 
-    // Inicializar
+    // Inicialización
     actualizarNombre();
     actualizarDineroPantalla();
+    actualizarConteoObjetos();
     cambiarJugador(0);
 </script>
 
