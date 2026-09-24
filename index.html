@@ -17,6 +17,7 @@
             color: white;
             text-align: center;
             padding: 15px;
+            padding-bottom: 50px;
         }
 
         .container {
@@ -30,7 +31,6 @@
             text-shadow: 0 0 10px #7928ca;
         }
 
-        /* Campo Nombre */
         .input-name {
             width: 100%;
             padding: 12px;
@@ -45,12 +45,7 @@
             outline: none;
         }
 
-        .input-name:focus {
-            border-color: #ff007f;
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
-        }
-
-        /* Escenario del Personaje */
+        /* Escenario */
         .character-stage {
             position: relative;
             width: 300px;
@@ -66,7 +61,6 @@
             align-items: center;
         }
 
-        /* Nombre del Héroe */
         .hero-title {
             position: absolute;
             top: 15px;
@@ -76,106 +70,24 @@
             letter-spacing: 2px;
             color: #00f2fe;
             text-shadow: 0 0 8px #00f2fe;
-            z-index: 20;
+            z-index: 30;
         }
 
-        /* Silueta Humanoide Base */
         .base-mannequin {
             width: 140px;
             height: 250px;
             z-index: 5;
-            position: relative;
         }
 
-        /* CAPAS DE EFECTOS Y PODERES */
-        .power-element {
+        /* Capas de Imágenes Dinámicas */
+        .custom-item {
             position: absolute;
-            display: none; /* Se activa con JS */
-            pointer-events: none;
-        }
-
-        /* 1. Aura Saiyajin */
-        #p-aura {
-            width: 260px;
-            height: 320px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,215,0,0.6) 0%, rgba(255,100,0,0.2) 60%, rgba(0,0,0,0) 80%);
-            box-shadow: 0 0 30px #ffcc00;
-            z-index: 2;
-            animation: pulseGlow 0.8s infinite alternate;
-        }
-
-        /* 2. Sentido Arácnido */
-        #p-spider-sense {
-            top: 45px;
-            width: 120px;
-            height: 50px;
-            z-index: 10;
-            animation: flash 0.6s infinite alternate;
-        }
-
-        /* 3. Ojos Sharingan */
-        #p-sharingan {
-            top: 88px;
-            width: 40px;
-            height: 10px;
-            z-index: 12;
             display: none;
-            justify-content: space-between;
-        }
-        .sharingan-dot {
-            width: 8px;
-            height: 8px;
-            background: red;
-            border-radius: 50%;
-            box-shadow: 0 0 6px red;
+            pointer-events: none;
+            z-index: 10;
         }
 
-        /* 4. Guantelete del Infinito (Mano Derecha) */
-        #p-gauntlet {
-            bottom: 110px;
-            right: 50px;
-            width: 25px;
-            height: 35px;
-            background: gold;
-            border-radius: 4px;
-            box-shadow: 0 0 12px gold;
-            z-index: 11;
-            border: 2px solid #ffaa00;
-        }
-
-        /* 5. Sable de Luz (Mano Izquierda) */
-        #p-lightsaber {
-            bottom: 100px;
-            left: 45px;
-            width: 6px;
-            height: 110px;
-            background: #00f2fe;
-            box-shadow: 0 0 12px #00f2fe, 0 0 25px #00f2fe;
-            transform: rotate(-25deg);
-            z-index: 11;
-            border-radius: 3px;
-        }
-
-        /* 6. Máscara Batman */
-        #p-batman {
-            top: 68px;
-            width: 50px;
-            height: 35px;
-            z-index: 13;
-        }
-
-        @keyframes pulseGlow {
-            0% { transform: scale(0.96); opacity: 0.7; }
-            100% { transform: scale(1.04); opacity: 1; }
-        }
-
-        @keyframes flash {
-            0% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-
-        /* Botones y Ficha */
+        /* Botones principales */
         .btn-spin {
             width: 100%;
             background: linear-gradient(45deg, #ff007f, #7928ca);
@@ -189,8 +101,6 @@
             box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
             margin-bottom: 15px;
         }
-
-        .btn-spin:active { transform: scale(0.98); }
 
         .btn-copy {
             width: 100%;
@@ -213,12 +123,6 @@
             border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .powers-card h3 {
-            font-size: 15px;
-            margin-bottom: 10px;
-            color: #aaa;
-        }
-
         .powers-list {
             list-style: none;
             max-height: 150px;
@@ -233,6 +137,88 @@
             font-size: 14px;
             border-left: 3px solid #ff007f;
         }
+
+        /* BOTÓN SECRETO ADMIN */
+        .secret-trigger {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            z-index: 999;
+        }
+
+        /* PANEL ADMIN OCULTO */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #111122;
+            border-top: 2px solid #ff007f;
+            padding: 15px;
+            z-index: 1000;
+            text-align: left;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.8);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .admin-panel h3 {
+            font-size: 16px;
+            color: #ff007f;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .admin-group {
+            margin-bottom: 10px;
+        }
+
+        .admin-group label {
+            display: block;
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 3px;
+        }
+
+        .admin-group select, .admin-group input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            background: #222238;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .controls-grid div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls-grid input[type="range"] {
+            width: 100%;
+        }
+
+        .btn-close-admin {
+            background: #ff0055;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -240,50 +226,26 @@
 <div class="container">
     <h1>⚡ Creador de Héroes ⚡</h1>
     
-    <input type="text" id="heroName" class="input-name" placeholder="Escribe tu nombre..." value="David" oninput="actualizarNombre()">
+    <input type="text" id="heroName" class="input-name" placeholder="Nombre..." value="David" oninput="actualizarNombre()">
 
     <!-- Escenario del Personaje -->
     <div class="character-stage">
         <div id="heroTitle" class="hero-title">DAVID</div>
 
-        <!-- Capas de Poderes (Vectoriales y Limpias) -->
-        <div id="p-aura" class="power-element"></div>
-        
-        <!-- Sentido Arácnido (Líneas vectoriales) -->
-        <svg id="p-spider-sense" class="power-element" viewBox="0 0 100 40">
-            <path d="M 10 30 L 30 10 M 50 25 L 50 0 M 90 30 L 70 10" stroke="#ff0055" stroke-width="4" stroke-linecap="round"/>
-        </svg>
+        <!-- Capas de Objetos Personalizables (Aura, Cabeza, Mano Der, Mano Izq, Espalda) -->
+        <img id="item-aura" class="custom-item" alt="Aura">
+        <img id="item-cabeza" class="custom-item" alt="Cabeza">
+        <img id="item-manoder" class="custom-item" alt="Mano Derecha">
+        <img id="item-manoizq" class="custom-item" alt="Mano Izquierda">
+        <img id="item-espalda" class="custom-item" alt="Espalda">
 
-        <!-- Ojos Sharingan -->
-        <div id="p-sharingan" class="power-element">
-            <div class="sharingan-dot"></div>
-            <div class="sharingan-dot"></div>
-        </div>
-
-        <!-- Máscara de Batman -->
-        <svg id="p-batman" class="power-element" viewBox="0 0 60 40">
-            <path d="M 10 30 Q 30 40 50 30 L 55 5 L 40 18 L 30 10 L 20 18 L 5 5 Z" fill="#111" stroke="#333" stroke-width="1"/>
-        </svg>
-
-        <!-- Guantelete -->
-        <div id="p-gauntlet" class="power-element"></div>
-
-        <!-- Sable de Luz -->
-        <div id="p-lightsaber" class="power-element"></div>
-
-        <!-- Silueta Humanoide Base (Gris) -->
+        <!-- Silueta Humanoide Base -->
         <svg class="base-mannequin" viewBox="0 0 100 200" fill="#4a4a5e">
-            <!-- Cabeza -->
             <circle cx="50" cy="30" r="16" />
-            <!-- Cuello -->
             <rect x="47" y="46" width="6" height="8" />
-            <!-- Torso -->
             <path d="M 28,54 L 72,54 L 63,115 L 37,115 Z" />
-            <!-- Brazo Izquierdo -->
             <path d="M 25,54 L 12,105 L 20,107 L 30,60 Z" />
-            <!-- Brazo Derecho -->
             <path d="M 75,54 L 88,105 L 80,107 L 70,60 Z" />
-            <!-- Piernas -->
             <rect x="37" y="117" width="10" height="65" rx="3" />
             <rect x="53" y="117" width="10" height="65" rx="3" />
         </svg>
@@ -292,7 +254,7 @@
     <button class="btn-spin" onclick="girarRuleta()">🎲 Girar Ruleta de Poderes</button>
 
     <div class="powers-card">
-        <h3>Poderes y Habilidades Equipadas:</h3>
+        <h3>Poderes y Equipamiento:</h3>
         <ul id="listaPoderes" class="powers-list">
             <li><em>Estado Base (Sin poderes)</em></li>
         </ul>
@@ -300,48 +262,146 @@
     </div>
 </div>
 
+<!-- Esquina Secreta (Botón transparente abajo a la izquierda) -->
+<div class="secret-trigger" onclick="toggleAdmin()"></div>
+
+<!-- Panel de Administración Oculto -->
+<div id="adminPanel" class="admin-panel">
+    <h3>⚙️ Panel Admin de Posicionamiento <button class="btn-close-admin" onclick="toggleAdmin()">X</button></h3>
+    
+    <div class="admin-group">
+        <label>1. Selecciona la Capa / Ranura:</label>
+        <select id="selectSlot" onchange="cargarConfiguracion()">
+            <option value="item-aura">🔥 Aura / Fondo</option>
+            <option value="item-cabeza">🪖 Cabeza / Máscara / Ojos</option>
+            <option value="item-manoder">💎 Mano Derecha (Ej. Guantelete)</option>
+            <option value="item-manoizq">⚔️ Mano Izquierda (Ej. Sable/Espada)</option>
+            <option value="item-espalda">🦇 Espalda / Alas</option>
+        </select>
+    </div>
+
+    <div class="admin-group">
+        <label>2. Cargar Imagen desde el Teléfono (PNG Transparente):</label>
+        <input type="file" accept="image/*" onchange="cargarImagenSlot(event)">
+    </div>
+
+    <div class="controls-grid">
+        <div>
+            <label>Posición Horizontal (X):</label>
+            <input type="range" id="posX" min="0" max="250" value="100" oninput="ajustarPosicion()">
+        </div>
+        <div>
+            <label>Posición Vertical (Y):</label>
+            <input type="range" id="posY" min="0" max="300" value="100" oninput="ajustarPosicion()">
+        </div>
+        <div>
+            <label>Tamaño / Ancho (px):</label>
+            <input type="range" id="sizeW" min="20" max="320" value="80" oninput="ajustarPosicion()">
+        </div>
+        <div>
+            <label>Capa de Profundidad (Z-Index):</label>
+            <input type="range" id="posZ" min="1" max="20" value="10" oninput="ajustarPosicion()">
+        </div>
+    </div>
+</div>
+
 <script>
+    // Estructura de Poderes asociables
     const poderesBanco = [
-        { id: "p-aura", nombre: "🔥 Aura Super Saiyajin (Dragon Ball)" },
-        { id: "p-spider-sense", nombre: "🕷️ Sentido Arácnido (Spider-Man)" },
-        { id: "p-sharingan", nombre: "👁️ Sharingan / Ojos Místicos (Naruto)" },
-        { id: "p-batman", nombre: "🦇 Máscara / Capucha de Héroe (Batman)" },
-        { id: "p-gauntlet", nombre: "💎 Guantelete del Infinito (Marvel)" },
-        { id: "p-lightsaber", nombre: "⚔️ Sable de Luz Neón (Star Wars)" }
+        { slot: "item-aura", nombre: "🔥 Aura de Fuego / Energía" },
+        { slot: "item-cabeza", nombre: "🪖 Casco / Máscara / Ojos Místicos" },
+        { slot: "item-manoder", nombre: "💎 Arma / Artefacto Mano Derecha" },
+        { slot: "item-manoizq", nombre: "⚔️ Espada / Sable Mano Izquierda" },
+        { slot: "item-espalda", nombre: "🦇 Alas / Capa de Espalda" }
     ];
 
     let poderesEquipados = [];
+
+    // Ajustes guardados para cada capa
+    let configCapas = {
+        'item-aura': { x: 20, y: 20, w: 260, z: 2 },
+        'item-cabeza': { x: 115, y: 55, w: 70, z: 15 },
+        'item-manoder': { x: 195, y: 150, w: 50, z: 12 },
+        'item-manoizq': { x: 45, y: 140, w: 50, z: 12 },
+        'item-espalda': { x: 50, y: 70, w: 200, z: 1 }
+    };
 
     function actualizarNombre() {
         const nombre = document.getElementById('heroName').value.trim();
         document.getElementById('heroTitle').innerText = nombre ? nombre.toUpperCase() : 'HÉROE';
     }
 
-    function girarRuleta() {
-        if (poderesEquipados.length >= poderesBanco.length) {
-            return;
+    function toggleAdmin() {
+        const panel = document.getElementById('adminPanel');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        if(panel.style.display === 'block') cargarConfiguracion();
+    }
+
+    function cargarImagenSlot(event) {
+        const slotId = document.getElementById('selectSlot').value;
+        const imgEl = document.getElementById(slotId);
+        const file = event.target.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imgEl.src = e.target.result;
+                imgEl.style.display = 'block'; // Hacerlo visible
+                aplicarEstilosSlot(slotId);
+            }
+            reader.readAsDataURL(file);
         }
+    }
+
+    function ajustarPosicion() {
+        const slotId = document.getElementById('selectSlot').value;
+        configCapas[slotId].x = document.getElementById('posX').value;
+        configCapas[slotId].y = document.getElementById('posY').value;
+        configCapas[slotId].w = document.getElementById('sizeW').value;
+        configCapas[slotId].z = document.getElementById('posZ').value;
+
+        aplicarEstilosSlot(slotId);
+    }
+
+    function aplicarEstilosSlot(slotId) {
+        const imgEl = document.getElementById(slotId);
+        const cfg = configCapas[slotId];
+        
+        imgEl.style.left = cfg.x + 'px';
+        imgEl.style.top = cfg.y + 'px';
+        imgEl.style.width = cfg.w + 'px';
+        imgEl.style.zIndex = cfg.z;
+    }
+
+    function cargarConfiguracion() {
+        const slotId = document.getElementById('selectSlot').value;
+        const cfg = configCapas[slotId];
+
+        document.getElementById('posX').value = cfg.x;
+        document.getElementById('posY').value = cfg.y;
+        document.getElementById('sizeW').value = cfg.w;
+        document.getElementById('posZ').value = cfg.z;
+    }
+
+    function girarRuleta() {
+        if (poderesEquipados.length >= poderesBanco.length) return;
 
         let poderNovedoso = null;
 
-        // Selección limpia sin alertas
         while (!poderNovedoso) {
             const candidato = poderesBanco[Math.floor(Math.random() * poderesBanco.length)];
-            if (!poderesEquipados.some(p => p.id === candidato.id)) {
+            if (!poderesEquipados.some(p => p.slot === candidato.slot)) {
                 poderNovedoso = candidato;
             }
         }
 
         poderesEquipados.push(poderNovedoso);
-        
-        // Activar visibilidad del elemento gráfico
-        const el = document.getElementById(poderNovedoso.id);
-        if (el) {
-            if (poderNovedoso.id === "p-sharingan") {
-                el.style.display = 'flex';
-            } else {
-                el.style.display = 'block';
-            }
+
+        // Si tiene imagen asignada en ese slot, mostrarla
+        const imgEl = document.getElementById(poderNovedoso.slot);
+        if (imgEl && imgEl.src) {
+            imgEl.style.display = 'block';
+            aplicarEstilosSlot(poderNovedoso.slot);
         }
 
         renderizarLista();
@@ -361,10 +421,10 @@
             return;
         }
 
-        const textoFinal = `Ficha de Personaje:\nNombre: ${nombre}\nPoderes y Equipamiento:\n${lista}`;
+        const textoFinal = `Ficha de Personaje:\nNombre: ${nombre}\nPoderes:\n${lista}`;
 
         navigator.clipboard.writeText(textoFinal).then(() => {
-            alert("¡Ficha copiada! Pégala en el chat con la IA para iniciar el combate.");
+            alert("¡Ficha copiada! Pégala en la IA para simular la batalla.");
         });
     }
 </script>
