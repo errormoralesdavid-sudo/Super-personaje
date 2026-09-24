@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creador de Héroes ⚡</title>
+    <title>Creador de Héroes & Subasta ⚡</title>
     <style>
         * {
             box-sizing: border-box;
@@ -17,7 +17,7 @@
             color: white;
             text-align: center;
             padding: 15px;
-            padding-bottom: 50px;
+            padding-bottom: 60px;
         }
 
         .container {
@@ -31,9 +31,60 @@
             text-shadow: 0 0 10px #7928ca;
         }
 
+        /* Panel de Presupuesto y Apuestas */
+        .wallet-panel {
+            display: flex;
+            justify-content: space-between;
+            background: #161628;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+        }
+
+        .wallet-card {
+            text-align: center;
+        }
+
+        .wallet-card span {
+            font-size: 11px;
+            color: #aaa;
+            display: block;
+        }
+
+        .wallet-card strong {
+            font-size: 18px;
+            color: #00e676;
+        }
+
+        /* Selector de Jugadores */
+        .player-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #161628;
+            border: 1px solid #333;
+            color: #aaa;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, #7928ca, #ff007f);
+            color: white;
+            border-color: #ff007f;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+        }
+
         .input-name {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border-radius: 12px;
             border: 2px solid #333;
             background: #161626;
@@ -79,15 +130,13 @@
             z-index: 5;
         }
 
-        /* Capas de Imágenes Dinámicas */
         .custom-item {
             position: absolute;
             display: none;
             pointer-events: none;
-            z-index: 10;
         }
 
-        /* Botones principales */
+        /* Botón Ruleta Principal */
         .btn-spin {
             width: 100%;
             background: linear-gradient(45deg, #ff007f, #7928ca);
@@ -102,19 +151,77 @@
             margin-bottom: 15px;
         }
 
-        .btn-copy {
-            width: 100%;
-            background: #00c853;
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 15px;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
-            margin-top: 10px;
+        /* Modal / Panel de Subasta */
+        .auction-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 800;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
+        .auction-box {
+            background: #16162a;
+            border: 2px solid #ff007f;
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.5);
+        }
+
+        .auction-box h2 {
+            font-size: 18px;
+            color: #ff007f;
+            margin-bottom: 5px;
+        }
+
+        .item-revealed {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00f2fe;
+            margin: 10px 0;
+            background: #0a0a14;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .bid-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .bid-input {
+            width: 90px;
+            padding: 10px;
+            font-size: 18px;
+            text-align: center;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #0a0a14;
+            color: #00e676;
+            font-weight: bold;
+        }
+
+        .btn-bid {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-assign-j1 { background: #7928ca; color: white; }
+        .btn-assign-j2 { background: #ff007f; color: white; }
+        .btn-discard { background: #444; color: #ccc; width: 100%; padding: 8px; margin-top: 5px; border-radius: 8px; border:none; }
+
+        /* Lista de poderes y copia */
         .powers-card {
             background: #121222;
             border-radius: 15px;
@@ -125,7 +232,7 @@
 
         .powers-list {
             list-style: none;
-            max-height: 150px;
+            max-height: 120px;
             overflow-y: auto;
         }
 
@@ -136,6 +243,19 @@
             border-radius: 8px;
             font-size: 14px;
             border-left: 3px solid #ff007f;
+        }
+
+        .btn-copy {
+            width: 100%;
+            background: #00c853;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 10px;
         }
 
         /* BOTÓN SECRETO ADMIN */
@@ -153,16 +273,14 @@
         .admin-panel {
             display: none;
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            bottom: 0; left: 0; right: 0;
             background: #111122;
             border-top: 2px solid #ff007f;
             padding: 15px;
             z-index: 1000;
             text-align: left;
             box-shadow: 0 -5px 25px rgba(0,0,0,0.8);
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
         }
 
@@ -174,18 +292,9 @@
             justify-content: space-between;
         }
 
-        .admin-group {
-            margin-bottom: 10px;
-        }
-
-        .admin-group label {
-            display: block;
-            font-size: 12px;
-            color: #ccc;
-            margin-bottom: 3px;
-        }
-
-        .admin-group select, .admin-group input[type="file"] {
+        .admin-group { margin-bottom: 10px; }
+        .admin-group label { display: block; font-size: 12px; color: #ccc; margin-bottom: 3px; }
+        .admin-group select, .admin-group input[type="text"], .admin-group input[type="file"], .admin-group input[type="number"] {
             width: 100%;
             padding: 8px;
             background: #222238;
@@ -201,45 +310,48 @@
             margin-top: 10px;
         }
 
-        .controls-grid div {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .controls-grid input[type="range"] {
-            width: 100%;
-        }
-
-        .btn-close-admin {
-            background: #ff0055;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 12px;
-            cursor: pointer;
-        }
+        .controls-grid div { display: flex; flex-direction: column; }
+        .btn-close-admin { background: #ff0055; color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 12px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>⚡ Creador de Héroes ⚡</h1>
+    <h1>⚡ Creador & Subasta de Héroes ⚡</h1>
     
-    <input type="text" id="heroName" class="input-name" placeholder="Nombre..." value="David" oninput="actualizarNombre()">
+    <!-- Marcador de Fondos de los Jugadores -->
+    <div class="wallet-panel">
+        <div class="wallet-card">
+            <span id="labelJ1">Jugador 1</span>
+            <strong id="moneyJ1">$100</strong>
+        </div>
+        <div style="font-size: 20px; color: #555;">VS</div>
+        <div class="wallet-card">
+            <span id="labelJ2">Jugador 2</span>
+            <strong id="moneyJ2">$100</strong>
+        </div>
+    </div>
+
+    <!-- Pestañas para elegir Ver Personaje -->
+    <div class="player-tabs">
+        <button class="tab-btn active" onclick="cambiarJugador(0)">👤 Ver Personaje 1</button>
+        <button class="tab-btn" onclick="cambiarJugador(1)">👤 Ver Personaje 2</button>
+    </div>
+
+    <input type="text" id="heroName" class="input-name" placeholder="Nombre..." oninput="actualizarNombre()">
 
     <!-- Escenario del Personaje -->
     <div class="character-stage">
         <div id="heroTitle" class="hero-title">DAVID</div>
 
-        <!-- Capas de Objetos Personalizables (Aura, Cabeza, Mano Der, Mano Izq, Espalda) -->
+        <!-- Capas de Objetos -->
         <img id="item-aura" class="custom-item" alt="Aura">
         <img id="item-cabeza" class="custom-item" alt="Cabeza">
         <img id="item-manoder" class="custom-item" alt="Mano Derecha">
         <img id="item-manoizq" class="custom-item" alt="Mano Izquierda">
         <img id="item-espalda" class="custom-item" alt="Espalda">
 
-        <!-- Silueta Humanoide Base -->
+        <!-- Silueta Base -->
         <svg class="base-mannequin" viewBox="0 0 100 200" fill="#4a4a5e">
             <circle cx="50" cy="30" r="16" />
             <rect x="47" y="46" width="6" height="8" />
@@ -251,18 +363,40 @@
         </svg>
     </div>
 
-    <button class="btn-spin" onclick="girarRuleta()">🎲 Girar Ruleta de Poderes</button>
+    <button class="btn-spin" onclick="sacarObjetoASubasta()">🎰 Girar Ruleta & Subastar Objeto</button>
 
     <div class="powers-card">
-        <h3>Poderes y Equipamiento:</h3>
+        <h3>Poderes Adquiridos:</h3>
         <ul id="listaPoderes" class="powers-list">
             <li><em>Estado Base (Sin poderes)</em></li>
         </ul>
-        <button class="btn-copy" onclick="copiarParaIA()">📋 Copiar Ficha para el Combate IA</button>
+        <button class="btn-copy" onclick="copiarCombateIA()">⚔️ Copiar Batalla Épica para la IA</button>
     </div>
 </div>
 
-<!-- Esquina Secreta (Botón transparente abajo a la izquierda) -->
+<!-- Ventana Emergente de Subasta -->
+<div id="auctionModal" class="auction-modal">
+    <div class="auction-box">
+        <h2>🏷️ ¡OBJETO REVELADO!</h2>
+        <div id="auctionItemName" class="item-revealed">🪽 Alas Místicas</div>
+        
+        <p style="font-size: 13px; color: #aaa;">Pujen por este poder. Ingrese el precio final ganado:</p>
+        
+        <div class="bid-controls">
+            <span>Monto $</span>
+            <input type="number" id="finalBidAmount" class="bid-input" value="5" min="0">
+        </div>
+
+        <p style="font-size: 12px; color: #ccc; margin-bottom: 8px;">¿Quién se queda con el objeto?</p>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-bid btn-assign-j1" style="flex:1;" onclick="concluirSubasta(0)">Gana P1</button>
+            <button class="btn-bid btn-assign-j2" style="flex:1;" onclick="concluirSubasta(1)">Gana P2</button>
+        </div>
+        <button class="btn-discard" onclick="cerrarSubasta()">Descartar / Nadie lo compra</button>
+    </div>
+</div>
+
+<!-- Esquina Secreta (Abajo Izquierda) -->
 <div class="secret-trigger" onclick="toggleAdmin()"></div>
 
 <!-- Panel de Administración Oculto -->
@@ -270,18 +404,31 @@
     <h3>⚙️ Panel Admin de Posicionamiento <button class="btn-close-admin" onclick="toggleAdmin()">X</button></h3>
     
     <div class="admin-group">
+        <label>Ajustar Dinero Inicial Jugadores ($):</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="number" id="initMoneyP1" value="100" placeholder="P1" onchange="ajustarDineroDirecto(0, this.value)">
+            <input type="number" id="initMoneyP2" value="100" placeholder="P2" onchange="ajustarDineroDirecto(1, this.value)">
+        </div>
+    </div>
+
+    <div class="admin-group">
         <label>1. Selecciona la Capa / Ranura:</label>
         <select id="selectSlot" onchange="cargarConfiguracion()">
+            <option value="item-espalda">🪽 Espalda / Alas</option>
             <option value="item-aura">🔥 Aura / Fondo</option>
             <option value="item-cabeza">🪖 Cabeza / Máscara / Ojos</option>
             <option value="item-manoder">💎 Mano Derecha (Ej. Guantelete)</option>
             <option value="item-manoizq">⚔️ Mano Izquierda (Ej. Sable/Espada)</option>
-            <option value="item-espalda">🦇 Espalda / Alas</option>
         </select>
     </div>
 
     <div class="admin-group">
-        <label>2. Cargar Imagen desde el Teléfono (PNG Transparente):</label>
+        <label>2. Nombre Personalizado del Poder (Bueno o Castigo):</label>
+        <input type="text" id="powerCustomName" placeholder="Ej: Alas Divinas / o Maldición" oninput="guardarNombrePoder()">
+    </div>
+
+    <div class="admin-group">
+        <label>3. Cargar Imagen desde el Teléfono (PNG Transparente):</label>
         <input type="file" accept="image/*" onchange="cargarImagenSlot(event)">
     </div>
 
@@ -299,36 +446,106 @@
             <input type="range" id="sizeW" min="20" max="320" value="80" oninput="ajustarPosicion()">
         </div>
         <div>
-            <label>Capa de Profundidad (Z-Index):</label>
+            <label>Profundidad (Z-Index):</label>
             <input type="range" id="posZ" min="1" max="20" value="10" oninput="ajustarPosicion()">
         </div>
     </div>
 </div>
 
 <script>
-    // Estructura de Poderes asociables
-    const poderesBanco = [
-        { slot: "item-aura", nombre: "🔥 Aura de Fuego / Energía" },
-        { slot: "item-cabeza", nombre: "🪖 Casco / Máscara / Ojos Místicos" },
-        { slot: "item-manoder", nombre: "💎 Arma / Artefacto Mano Derecha" },
-        { slot: "item-manoizq", nombre: "⚔️ Espada / Sable Mano Izquierda" },
-        { slot: "item-espalda", nombre: "🦇 Alas / Capa de Espalda" }
+    // Datos de los 2 Jugadores
+    let jugadores = [
+        { nombre: "David", dinero: 100, poderesEquipados: [], imagenes: {} },
+        { nombre: "Pareja", dinero: 100, poderesEquipados: [], imagenes: {} }
     ];
 
-    let poderesEquipados = [];
+    let jugadorActual = 0;
+    let objetoEnSubasta = null;
 
-    // Ajustes guardados para cada capa
+    // Configuración general de capas
     let configCapas = {
-        'item-aura': { x: 20, y: 20, w: 260, z: 2 },
-        'item-cabeza': { x: 115, y: 55, w: 70, z: 15 },
-        'item-manoder': { x: 195, y: 150, w: 50, z: 12 },
-        'item-manoizq': { x: 45, y: 140, w: 50, z: 12 },
-        'item-espalda': { x: 50, y: 70, w: 200, z: 1 }
+        'item-espalda': { x: 50, y: 70, w: 200, z: 1, nombre: "🪽 Alas Místicas" },
+        'item-aura': { x: 20, y: 20, w: 260, z: 2, nombre: "🔥 Aura Infinito / Maldición" },
+        'item-cabeza': { x: 115, y: 55, w: 70, z: 15, nombre: "🪖 Máscara de Poder / Casco Pesado" },
+        'item-manoder': { x: 195, y: 150, w: 50, z: 12, nombre: "💎 Guantelete / Grilletes" },
+        'item-manoizq': { x: 45, y: 140, w: 50, z: 12, nombre: "⚔️ Espada Legendaria / Escudo Roto" }
     };
+
+    function cambiarJugador(index) {
+        jugadorActual = index;
+        
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach((tab, i) => {
+            if(i === index) tab.classList.add('active');
+            else tab.classList.remove('active');
+        });
+
+        document.getElementById('heroName').value = jugadores[jugadorActual].nombre;
+        actualizarNombre();
+        renderizarLista();
+        refrescarVisualesPersonaje();
+    }
 
     function actualizarNombre() {
         const nombre = document.getElementById('heroName').value.trim();
-        document.getElementById('heroTitle').innerText = nombre ? nombre.toUpperCase() : 'HÉROE';
+        jugadores[jugadorActual].nombre = nombre || `Jugador ${jugadorActual + 1}`;
+        document.getElementById('heroTitle').innerText = jugadores[jugadorActual].nombre.toUpperCase();
+        
+        // Actualizar nombres en panel de dinero
+        document.getElementById('labelJ1').innerText = jugadores[0].nombre;
+        document.getElementById('labelJ2').innerText = jugadores[1].nombre;
+    }
+
+    function actualizarDineroPantalla() {
+        document.getElementById('moneyJ1').innerText = `$${jugadores[0].dinero}`;
+        document.getElementById('moneyJ2').innerText = `$${jugadores[1].dinero}`;
+    }
+
+    function ajustarDineroDirecto(jIndex, val) {
+        jugadores[jIndex].dinero = parseInt(val) || 0;
+        actualizarDineroPantalla();
+    }
+
+    function sacarObjetoASubasta() {
+        const slotsDisponibles = Object.keys(configCapas);
+        const slotElegido = slotsDisponibles[Math.floor(Math.random() * slotsDisponibles.length)];
+
+        objetoEnSubasta = {
+            slot: slotElegido,
+            nombre: configCapas[slotElegido].nombre
+        };
+
+        document.getElementById('auctionItemName').innerText = objetoEnSubasta.nombre;
+        document.getElementById('finalBidAmount').value = 5; // apuesta por defecto
+        document.getElementById('auctionModal').style.display = 'flex';
+    }
+
+    function concluirSubasta(ganadorIndex) {
+        const costo = parseInt(document.getElementById('finalBidAmount').value) || 0;
+        
+        if (jugadores[ganadorIndex].dinero < costo) {
+            alert(`¡${jugadores[ganadorIndex].nombre} no tiene suficiente dinero para pagar $${costo}!`);
+            return;
+        }
+
+        // Restar dinero
+        jugadores[ganadorIndex].dinero -= costo;
+        actualizarDineroPantalla();
+
+        // Si ya tenía un objeto en esa ranura, reemplazarlo
+        const j = jugadores[ganadorIndex];
+        j.poderesEquipados = j.poderesEquipados.filter(p => p.slot !== objetoEnSubasta.slot);
+        j.poderesEquipados.push(objetoEnSubasta);
+
+        cerrarSubasta();
+
+        // Cambiar la vista al jugador que ganó para que vea su objeto
+        cambiarJugador(ganadorIndex);
+    }
+
+    function cerrarSubasta() {
+        document.getElementById('auctionModal').style.display = 'none';
+        objetoEnSubasta = null;
     }
 
     function toggleAdmin() {
@@ -337,16 +554,28 @@
         if(panel.style.display === 'block') cargarConfiguracion();
     }
 
+    function guardarNombrePoder() {
+        const slotId = document.getElementById('selectSlot').value;
+        const nuevoNombre = document.getElementById('powerCustomName').value.trim();
+        if(nuevoNombre) {
+            configCapas[slotId].nombre = nuevoNombre;
+        }
+    }
+
     function cargarImagenSlot(event) {
         const slotId = document.getElementById('selectSlot').value;
-        const imgEl = document.getElementById(slotId);
         const file = event.target.files[0];
         
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
+                // Se asigna la imagen globalmente
+                jugadores[0].imagenes[slotId] = e.target.result;
+                jugadores[1].imagenes[slotId] = e.target.result;
+
+                const imgEl = document.getElementById(slotId);
                 imgEl.src = e.target.result;
-                imgEl.style.display = 'block'; // Hacerlo visible
+                imgEl.style.display = 'block';
                 aplicarEstilosSlot(slotId);
             }
             reader.readAsDataURL(file);
@@ -381,52 +610,65 @@
         document.getElementById('posY').value = cfg.y;
         document.getElementById('sizeW').value = cfg.w;
         document.getElementById('posZ').value = cfg.z;
+        document.getElementById('powerCustomName').value = cfg.nombre;
     }
 
-    function girarRuleta() {
-        if (poderesEquipados.length >= poderesBanco.length) return;
+    function refrescarVisualesPersonaje() {
+        const j = jugadores[jugadorActual];
+        const slots = Object.keys(configCapas);
 
-        let poderNovedoso = null;
+        slots.forEach(slot => {
+            const imgEl = document.getElementById(slot);
+            const poseePoder = j.poderesEquipados.some(p => p.slot === slot);
 
-        while (!poderNovedoso) {
-            const candidato = poderesBanco[Math.floor(Math.random() * poderesBanco.length)];
-            if (!poderesEquipados.some(p => p.slot === candidato.slot)) {
-                poderNovedoso = candidato;
+            if (poseePoder && j.imagenes[slot]) {
+                imgEl.src = j.imagenes[slot];
+                imgEl.style.display = 'block';
+                aplicarEstilosSlot(slot);
+            } else {
+                imgEl.style.display = 'none';
             }
-        }
-
-        poderesEquipados.push(poderNovedoso);
-
-        // Si tiene imagen asignada en ese slot, mostrarla
-        const imgEl = document.getElementById(poderNovedoso.slot);
-        if (imgEl && imgEl.src) {
-            imgEl.style.display = 'block';
-            aplicarEstilosSlot(poderNovedoso.slot);
-        }
-
-        renderizarLista();
+        });
     }
 
     function renderizarLista() {
         const ul = document.getElementById('listaPoderes');
-        ul.innerHTML = poderesEquipados.map(p => `<li>${p.nombre}</li>`).join('');
+        const j = jugadores[jugadorActual];
+        if (j.poderesEquipados.length === 0) {
+            ul.innerHTML = '<li><em>Estado Base (Sin poderes)</em></li>';
+        } else {
+            ul.innerHTML = j.poderesEquipados.map(p => `<li>${p.nombre}</li>`).join('');
+        }
     }
 
-    function copiarParaIA() {
-        const nombre = document.getElementById('heroName').value || "Héroe";
-        const lista = poderesEquipados.map(p => `- ${p.nombre}`).join('\n');
-        
-        if (poderesEquipados.length === 0) {
-            alert("¡Gira la ruleta primero!");
-            return;
-        }
+    function copiarCombateIA() {
+        const j1 = jugadores[0];
+        const j2 = jugadores[1];
 
-        const textoFinal = `Ficha de Personaje:\nNombre: ${nombre}\nPoderes:\n${lista}`;
+        const lista1 = j1.poderesEquipados.map(p => `- ${p.nombre}`).join('\n') || "- Ninguno";
+        const lista2 = j2.poderesEquipados.map(p => `- ${p.nombre}`).join('\n') || "- Ninguno";
 
-        navigator.clipboard.writeText(textoFinal).then(() => {
-            alert("¡Ficha copiada! Pégala en la IA para simular la batalla.");
+        const promptFinal = `¡Simula una batalla épica paso a paso entre estos dos luchadores y decide quién gana!
+
+Luchador 1: ${j1.nombre} (Presupuesto Restante: $${j1.dinero})
+Poderes y Objetos Ganados:
+${lista1}
+
+Luchador 2: ${j2.nombre} (Presupuesto Restante: $${j2.dinero})
+Poderes y Objetos Ganados:
+${lista2}
+
+Describe el combate con acción estilo anime. Toma en cuenta tanto sus poderes positivos como cualquier castigo u objeto que hayan ganado en la subasta para determinar al vencedor.`;
+
+        navigator.clipboard.writeText(promptFinal).then(() => {
+            alert("¡Prompt copiado! Pégalo a la IA para que simule el combate.");
         });
     }
+
+    // Inicializar
+    actualizarNombre();
+    actualizarDineroPantalla();
+    cambiarJugador(0);
 </script>
 
 </body>
