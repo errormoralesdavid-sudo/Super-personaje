@@ -3,150 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creador de Luchadores</title>
+    <title>Creador de Héroes ⚡</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f0f1a;
+            background: #0a0a12;
             color: white;
             text-align: center;
-            margin: 0;
-            padding: 20px;
+            padding: 15px;
         }
 
         .container {
-            max-width: 400px;
+            max-width: 420px;
             margin: auto;
         }
 
-        /* Stage del Personaje */
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #7928ca;
+        }
+
+        /* Campo de Nombre */
+        .input-name {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #333;
+            background: #161626;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        .input-name:focus {
+            border-color: #ff007f;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
+        }
+
+        /* Escenario del Personaje */
         .character-stage {
             position: relative;
-            width: 280px;
+            width: 300px;
             height: 380px;
-            margin: 20px auto;
-            background: #1a1a2e;
+            margin: 0 auto 15px auto;
+            background: radial-gradient(circle, #1f1f3a 0%, #0d0d1a 100%);
             border-radius: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 25px rgba(121, 40, 202, 0.3);
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Capas visuales del personaje */
+        /* Nombre Flotante */
+        .hero-title {
+            position: absolute;
+            top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00f2fe;
+            text-shadow: 0 0 8px #00f2fe;
+            z-index: 10;
+        }
+
+        /* Capas Gráficas del Personaje */
         .layer {
             position: absolute;
             width: 100%;
             height: 100%;
-            transition: all 0.5s ease;
+            pointer-events: none;
+            transition: all 0.4s ease;
         }
 
-        .base-character {
-            width: 140px;
-            height: 260px;
-            background: #555; /* Representación en gris */
-            border-radius: 70px 70px 20px 20px;
-            position: relative;
+        /* Silueta Base Humanoide */
+        .base-mannequin {
+            width: 160px;
+            height: 280px;
             z-index: 2;
+            filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));
         }
 
-        /* Capas de poderes (Efectos CSS) */
-        .aura-fuego {
-            box-shadow: inset 0 0 50px #ff4500, 0 0 50px #ff4500;
+        /* EFECTOS Y PODERES VISUALES */
+        .aura-dbz {
+            background: radial-gradient(circle, rgba(255,230,0,0.5) 0%, rgba(255,100,0,0.3) 50%, rgba(0,0,0,0) 70%);
+            animation: pulseAura 0.8s infinite alternate;
+        }
+
+        .mangekyou-eye {
+            position: absolute;
+            top: 110px;
+            width: 10px;
+            height: 10px;
+            background: red;
             border-radius: 50%;
-            animation: pulse 1.5s infinite alternate;
+            box-shadow: 0 0 8px red;
+            z-index: 5;
+        }
+        .eye-left { left: 138px; }
+        .eye-right { right: 138px; }
+
+        .guantelet-infinity {
+            position: absolute;
+            bottom: 120px;
+            right: 55px;
+            width: 30px;
+            height: 45px;
+            background: gold;
+            border-radius: 5px;
+            box-shadow: 0 0 15px gold;
+            z-index: 4;
         }
 
-        .aura-rayo {
-            box-shadow: inset 0 0 50px #00d2ff, 0 0 60px #00d2ff;
-            border-radius: 50%;
+        .lightsaber {
+            position: absolute;
+            bottom: 100px;
+            left: 45px;
+            width: 8px;
+            height: 140px;
+            background: #00ffcc;
+            box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
+            transform: rotate(-25deg);
+            z-index: 4;
+            border-radius: 4px;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 0.8; }
+        .susanoo-armor {
+            border: 4px solid #9d00ff;
+            box-shadow: inset 0 0 30px #9d00ff, 0 0 30px #9d00ff;
+            border-radius: 20px;
+            z-index: 1;
+        }
+
+        @keyframes pulseAura {
+            0% { transform: scale(0.95); opacity: 0.7; }
             100% { transform: scale(1.05); opacity: 1; }
         }
 
-        /* Botón Ruleta */
+        /* Botones */
         .btn-spin {
+            width: 100%;
             background: linear-gradient(45deg, #ff007f, #7928ca);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 16px;
             font-size: 18px;
             font-weight: bold;
-            border-radius: 30px;
+            border-radius: 15px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
-            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
+            margin-bottom: 15px;
+        }
+
+        .btn-spin:active { transform: scale(0.98); }
+
+        .btn-copy {
+            width: 100%;
+            background: #00c853;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Lista de Poderes */
+        .powers-card {
+            background: #121222;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .powers-card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #aaa;
         }
 
         .powers-list {
-            text-align: left;
-            background: #16213e;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
+            list-style: none;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .powers-list li {
+            background: #1a1a3a;
+            margin-bottom: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            border-left: 3px solid #ff007f;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>⚡ Creador de Héroes ⚡</h2>
+    <h1>⚡ Creador de Héroes ⚡</h1>
+    
+    <input type="text" id="heroName" class="input-name" placeholder="Escribe el nombre de tu Héroe..." value="David" oninput="actualizarNombre()">
 
-    <!-- Visualización del Personaje -->
-    <div class="character-stage" id="stage">
+    <!-- Escenario del Personaje -->
+    <div class="character-stage">
+        <div id="heroTitle" class="hero-title">DAVID</div>
+        
+        <!-- Capas de efectos -->
         <div id="auraLayer" class="layer"></div>
-        <div class="base-character" id="base"></div>
+        <div id="armorLayer" class="layer"></div>
+        <div id="eyesLayer"></div>
+        <div id="weaponLeft"></div>
+        <div id="weaponRight"></div>
+
+        <!-- Silueta Humanoide Base -->
+        <svg class="base-mannequin" viewBox="0 0 100 200" fill="#4a4a5a">
+            <!-- Cabeza -->
+            <circle cx="50" cy="30" r="18" />
+            <!-- Cuello -->
+            <rect x="46" y="48" width="8" height="10" />
+            <!-- Torso -->
+            <path d="M 25,58 L 75,58 L 65,120 L 35,120 Z" />
+            <!-- Brazos -->
+            <path d="M 22,58 L 10,110 L 18,112 L 28,65 Z" />
+            <path d="M 78,58 L 90,110 L 82,112 L 72,65 Z" />
+            <!-- Piernas -->
+            <rect x="36" y="122" width="11" height="65" rx="4" />
+            <rect x="53" y="122" width="11" height="65" rx="4" />
+        </svg>
     </div>
 
     <button class="btn-spin" onclick="girarRuleta()">🎲 Girar Ruleta de Poderes</button>
 
-    <div class="powers-list">
-        <h3>Poderes Equipados:</h3>
-        <ul id="listaPoderes">
-            <li><em>Sujeto en estado base (Gris)</em></li>
+    <div class="powers-card">
+        <h3>Poderes y Habilidades Equipadas:</h3>
+        <ul id="listaPoderes" class="powers-list">
+            <li><em>Estado Base (Sin poderes)</em></li>
         </ul>
+        <button class="btn-copy" onclick="copiarParaIA()">📋 Copiar Ficha para el Combate IA</button>
     </div>
 </div>
 
 <script>
-    const poderesDisponibles = [
-        { nombre: "🔥 Aura de Fuego Infinito", efecto: "aura-fuego" },
-        { nombre: "⚡ Velocidad de Rayo", efecto: "aura-rayo" },
-        { nombre: "🛡️ Escudo Telequinético", efecto: "escudo" },
-        { nombre: "🦇 Alas de Sombra", efecto: "alas" },
-        { nombre: "🤖 Brazos Ciber-Mecánicos", efecto: "ciber" }
+    // Banco de poderes de Anime, Marvel, DC, Películas y Videojuegos
+    const poderesBanco = [
+        { nombre: "🔥 Super Saiyajin (Dragon Ball)", tipo: "aura", clase: "aura-dbz" },
+        { nombre: "👁️ Sharingan / Mangekyou (Naruto)", tipo: "ojos", clase: "mangekyou-eye" },
+        { nombre: "💎 Guantelete del Infinito (Marvel)", tipo: "derecha", clase: "guantelet-infinity" },
+        { nombre: "⚔️ Sable de Luz Jedi (Star Wars)", tipo: "izquierda", clase: "lightsaber" },
+        { nombre: "🛡️ Armadura Susanoo (Naruto)", tipo: "armadura", clase: "susanoo-armor" },
+        { nombre: "⚡ Velocidad de Flash (DC)", tipo: "habilidad" },
+        { nombre: "🕸️ Sentido Arácnido de Spider-Man (Marvel)", tipo: "habilidad" },
+        { nombre: "🦇 Traje de Batman con Gadgets (DC)", tipo: "habilidad" },
+        { nombre: "❄️ Dominio del Hielo de Sub-Zero (Mortal Kombat)", tipo: "habilidad" },
+        { nombre: "🔴 Kamehameha (Dragon Ball)", tipo: "habilidad" }
     ];
 
-    let poderesObtenidos = [];
+    let poderesEquipados = [];
+
+    function actualizarNombre() {
+        const nombre = document.getElementById('heroName').value.trim();
+        document.getElementById('heroTitle').innerText = nombre ? nombre.toUpperCase() : 'HÉRRO';
+    }
 
     function girarRuleta() {
-        // Seleccionar poder aleatorio
-        const poder = poderesDisponibles[Math.floor(Math.random() * poderesDisponibles.length)];
+        const poder = poderesBanco[Math.floor(Math.random() * poderesBanco.length)];
         
-        if (!poderesObtenidos.includes(poder.nombre)) {
-            poderesObtenidos.push(poder.nombre);
-            
-            // Aplicar cambio visual
-            if (poder.efecto === 'aura-fuego') {
-                document.getElementById('auraLayer').className = 'layer aura-fuego';
-            } else if (poder.efecto === 'aura-rayo') {
-                document.getElementById('auraLayer').className = 'layer aura-rayo';
-            }
-
-            // Actualizar Lista
-            actualizarLista();
+        if (!poderesEquipados.some(p => p.nombre === poder.nombre)) {
+            poderesEquipados.push(poder);
+            aplicarEfectoVisual(poder);
+            renderizarLista();
         } else {
-            alert("¡Ya tienes este poder! Gira de nuevo.");
+            alert("¡Ya te salió este poder! Vuelve a girar.");
         }
     }
 
-    function actualizarLista() {
-        const listEl = document.getElementById('listaPoderes');
-        listEl.innerHTML = poderesObtenidos.map(p => `<li>${p}</li>`).join('');
+    function aplicarEfectoVisual(poder) {
+        if (poder.tipo === "aura") {
+            document.getElementById('auraLayer').className = "layer " + poder.clase;
+        } else if (poder.tipo === "armadura") {
+            document.getElementById('armorLayer').className = "layer " + poder.clase;
+        } else if (poder.tipo === "ojos") {
+            document.getElementById('eyesLayer').innerHTML = `
+                <div class="${poder.clase} eye-left"></div>
+                <div class="${poder.clase} eye-right"></div>
+            `;
+        } else if (poder.tipo === "izquierda") {
+            document.getElementById('weaponLeft').className = poder.clase;
+        } else if (poder.tipo === "derecha") {
+            document.getElementById('weaponRight').className = poder.clase;
+        }
+    }
+
+    function renderizarLista() {
+        const ul = document.getElementById('listaPoderes');
+        ul.innerHTML = poderesEquipados.map(p => `<li>${p.nombre}</li>`).join('');
+    }
+
+    function copiarParaIA() {
+        const nombre = document.getElementById('heroName').value || "Héroe";
+        const lista = poderesEquipados.map(p => `- ${p.nombre}`).join('\n');
+        
+        if (poderesEquipados.length === 0) {
+            alert("¡Gira la ruleta al menos una vez antes de copiar!");
+            return;
+        }
+
+        const textoFinal = `Ficha del Personaje para la Batalla:\nNombre: ${nombre}\nPoderes y Equipamiento:\n${lista}`;
+
+        navigator.clipboard.writeText(textoFinal).then(() => {
+            alert("¡Ficha copiada al portapapeles! Pégala en el chat para iniciar la batalla.");
+        });
     }
 </script>
 
