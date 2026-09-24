@@ -25,7 +25,7 @@
         }
 
         h1 {
-            font-size: 24px;
+            font-size: 22px;
             margin-bottom: 10px;
             text-shadow: 0 0 10px #7928ca;
         }
@@ -54,7 +54,7 @@
         .character-stage {
             position: relative;
             width: 300px;
-            height: 380px;
+            height: 360px;
             margin: 0 auto 15px auto;
             background: radial-gradient(circle, #1f1f3a 0%, #0d0d1a 100%);
             border-radius: 20px;
@@ -81,71 +81,98 @@
 
         /* Silueta Humanoide Base */
         .base-mannequin {
-            width: 150px;
-            height: 270px;
+            width: 140px;
+            height: 250px;
             z-index: 5;
-            filter: drop-shadow(0 0 8px rgba(0,0,0,0.9));
+            position: relative;
         }
 
-        /* IMÁGENES PNG SOBREPUESTAS */
-        .img-layer {
+        /* CAPAS DE EFECTOS Y PODERES */
+        .power-element {
             position: absolute;
+            display: none; /* Se activa con JS */
             pointer-events: none;
-            display: none; /* Se activan dinámicamente */
         }
 
-        /* Posiciones exactas para cada accesorio/poder */
-        #img-spider-sense {
-            width: 130px;
-            top: 40px;
-            z-index: 10;
-            animation: pulse 1s infinite alternate;
-        }
-
-        #img-infinity-gauntlet {
-            width: 65px;
-            bottom: 110px;
-            right: 42px;
-            z-index: 12;
-            transform: rotate(-10deg);
-        }
-
-        #img-lightsaber {
-            width: 70px;
-            bottom: 100px;
-            left: 30px;
-            z-index: 12;
-            transform: rotate(-20deg);
-        }
-
-        #img-ssj-aura {
-            width: 280px;
-            height: 350px;
+        /* 1. Aura Saiyajin */
+        #p-aura {
+            width: 260px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,215,0,0.6) 0%, rgba(255,100,0,0.2) 60%, rgba(0,0,0,0) 80%);
+            box-shadow: 0 0 30px #ffcc00;
             z-index: 2;
-            opacity: 0.85;
-            animation: glow 0.8s infinite alternate;
+            animation: pulseGlow 0.8s infinite alternate;
         }
 
-        #img-batman-mask {
-            width: 70px;
-            top: 60px;
-            z-index: 15;
+        /* 2. Sentido Arácnido */
+        #p-spider-sense {
+            top: 45px;
+            width: 120px;
+            height: 50px;
+            z-index: 10;
+            animation: flash 0.6s infinite alternate;
         }
 
-        #img-sharingan {
-            width: 45px;
-            top: 73px;
-            z-index: 16;
+        /* 3. Ojos Sharingan */
+        #p-sharingan {
+            top: 88px;
+            width: 40px;
+            height: 10px;
+            z-index: 12;
+            display: none;
+            justify-content: space-between;
+        }
+        .sharingan-dot {
+            width: 8px;
+            height: 8px;
+            background: red;
+            border-radius: 50%;
+            box-shadow: 0 0 6px red;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(0.95); }
-            100% { transform: scale(1.05); }
+        /* 4. Guantelete del Infinito (Mano Derecha) */
+        #p-gauntlet {
+            bottom: 110px;
+            right: 50px;
+            width: 25px;
+            height: 35px;
+            background: gold;
+            border-radius: 4px;
+            box-shadow: 0 0 12px gold;
+            z-index: 11;
+            border: 2px solid #ffaa00;
         }
 
-        @keyframes glow {
-            0% { filter: drop-shadow(0 0 5px gold); }
-            100% { filter: drop-shadow(0 0 20px gold); }
+        /* 5. Sable de Luz (Mano Izquierda) */
+        #p-lightsaber {
+            bottom: 100px;
+            left: 45px;
+            width: 6px;
+            height: 110px;
+            background: #00f2fe;
+            box-shadow: 0 0 12px #00f2fe, 0 0 25px #00f2fe;
+            transform: rotate(-25deg);
+            z-index: 11;
+            border-radius: 3px;
+        }
+
+        /* 6. Máscara Batman */
+        #p-batman {
+            top: 68px;
+            width: 50px;
+            height: 35px;
+            z-index: 13;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.96); opacity: 0.7; }
+            100% { transform: scale(1.04); opacity: 1; }
+        }
+
+        @keyframes flash {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
         }
 
         /* Botones y Ficha */
@@ -187,7 +214,7 @@
         }
 
         .powers-card h3 {
-            font-size: 16px;
+            font-size: 15px;
             margin-bottom: 10px;
             color: #aaa;
         }
@@ -213,29 +240,52 @@
 <div class="container">
     <h1>⚡ Creador de Héroes ⚡</h1>
     
-    <input type="text" id="heroName" class="input-name" placeholder="Nombre del personaje..." value="David" oninput="actualizarNombre()">
+    <input type="text" id="heroName" class="input-name" placeholder="Escribe tu nombre..." value="David" oninput="actualizarNombre()">
 
     <!-- Escenario del Personaje -->
     <div class="character-stage">
         <div id="heroTitle" class="hero-title">DAVID</div>
 
-        <!-- Capas de Imágenes Transparentes PNG -->
-        <img id="img-ssj-aura" class="img-layer" src="https://pngimg.com/uploads/fire/fire_PNG8935.png" alt="Aura">
-        <img id="img-spider-sense" class="img-layer" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Lightning_Flash_Icon.svg/512px-Lightning_Flash_Icon.svg.png" alt="Sentido Arácnido">
-        <img id="img-sharingan" class="img-layer" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Sharingan_triple.svg/512px-Sharingan_triple.svg.png" alt="Sharingan">
-        <img id="img-batman-mask" class="img-layer" src="https://pngimg.com/uploads/batman/batman_PNG48.png" alt="Máscara">
-        <img id="img-infinity-gauntlet" class="img-layer" src="https://pngimg.com/uploads/glove/glove_PNG82.png" alt="Guantelete">
-        <img id="img-lightsaber" class="img-layer" src="https://pngimg.com/uploads/sword/sword_PNG5526.png" alt="Sable de Luz">
+        <!-- Capas de Poderes (Vectoriales y Limpias) -->
+        <div id="p-aura" class="power-element"></div>
+        
+        <!-- Sentido Arácnido (Líneas vectoriales) -->
+        <svg id="p-spider-sense" class="power-element" viewBox="0 0 100 40">
+            <path d="M 10 30 L 30 10 M 50 25 L 50 0 M 90 30 L 70 10" stroke="#ff0055" stroke-width="4" stroke-linecap="round"/>
+        </svg>
 
-        <!-- Silueta Base -->
-        <svg class="base-mannequin" viewBox="0 0 100 200" fill="#3a3a4a">
-            <circle cx="50" cy="30" r="18" />
-            <rect x="46" y="48" width="8" height="10" />
-            <path d="M 25,58 L 75,58 L 65,120 L 35,120 Z" />
-            <path d="M 22,58 L 10,110 L 18,112 L 28,65 Z" />
-            <path d="M 78,58 L 90,110 L 82,112 L 72,65 Z" />
-            <rect x="36" y="122" width="11" height="65" rx="4" />
-            <rect x="53" y="122" width="11" height="65" rx="4" />
+        <!-- Ojos Sharingan -->
+        <div id="p-sharingan" class="power-element">
+            <div class="sharingan-dot"></div>
+            <div class="sharingan-dot"></div>
+        </div>
+
+        <!-- Máscara de Batman -->
+        <svg id="p-batman" class="power-element" viewBox="0 0 60 40">
+            <path d="M 10 30 Q 30 40 50 30 L 55 5 L 40 18 L 30 10 L 20 18 L 5 5 Z" fill="#111" stroke="#333" stroke-width="1"/>
+        </svg>
+
+        <!-- Guantelete -->
+        <div id="p-gauntlet" class="power-element"></div>
+
+        <!-- Sable de Luz -->
+        <div id="p-lightsaber" class="power-element"></div>
+
+        <!-- Silueta Humanoide Base (Gris) -->
+        <svg class="base-mannequin" viewBox="0 0 100 200" fill="#4a4a5e">
+            <!-- Cabeza -->
+            <circle cx="50" cy="30" r="16" />
+            <!-- Cuello -->
+            <rect x="47" y="46" width="6" height="8" />
+            <!-- Torso -->
+            <path d="M 28,54 L 72,54 L 63,115 L 37,115 Z" />
+            <!-- Brazo Izquierdo -->
+            <path d="M 25,54 L 12,105 L 20,107 L 30,60 Z" />
+            <!-- Brazo Derecho -->
+            <path d="M 75,54 L 88,105 L 80,107 L 70,60 Z" />
+            <!-- Piernas -->
+            <rect x="37" y="117" width="10" height="65" rx="3" />
+            <rect x="53" y="117" width="10" height="65" rx="3" />
         </svg>
     </div>
 
@@ -252,12 +302,12 @@
 
 <script>
     const poderesBanco = [
-        { id: "img-spider-sense", nombre: "🕷️ Sentido Arácnido (Spider-Man)" },
-        { id: "img-infinity-gauntlet", nombre: "💎 Guantelete del Infinito (Marvel)" },
-        { id: "img-lightsaber", nombre: "⚔️ Sable de Luz / Espada mística" },
-        { id: "img-ssj-aura", nombre: "🔥 Aura de Fuego / Super Saiyajin" },
-        { id: "img-batman-mask", nombre: "🦇 Máscara de Héroe / Batman" },
-        { id: "img-sharingan", nombre: "👁️ Ojo Místico / Sharingan" }
+        { id: "p-aura", nombre: "🔥 Aura Super Saiyajin (Dragon Ball)" },
+        { id: "p-spider-sense", nombre: "🕷️ Sentido Arácnido (Spider-Man)" },
+        { id: "p-sharingan", nombre: "👁️ Sharingan / Ojos Místicos (Naruto)" },
+        { id: "p-batman", nombre: "🦇 Máscara / Capucha de Héroe (Batman)" },
+        { id: "p-gauntlet", nombre: "💎 Guantelete del Infinito (Marvel)" },
+        { id: "p-lightsaber", nombre: "⚔️ Sable de Luz Neón (Star Wars)" }
     ];
 
     let poderesEquipados = [];
@@ -268,14 +318,13 @@
     }
 
     function girarRuleta() {
-        // Si ya tiene todos los poderes, avisar
         if (poderesEquipados.length >= poderesBanco.length) {
             return;
         }
 
         let poderNovedoso = null;
 
-        // Bucle automático que busca un poder SIN mostrar notificaciones molestas
+        // Selección limpia sin alertas
         while (!poderNovedoso) {
             const candidato = poderesBanco[Math.floor(Math.random() * poderesBanco.length)];
             if (!poderesEquipados.some(p => p.id === candidato.id)) {
@@ -283,13 +332,16 @@
             }
         }
 
-        // Agregar poder
         poderesEquipados.push(poderNovedoso);
         
-        // Mostrar imagen correspondiente en el personaje
-        const imgEl = document.getElementById(poderNovedoso.id);
-        if (imgEl) {
-            imgEl.style.display = 'block';
+        // Activar visibilidad del elemento gráfico
+        const el = document.getElementById(poderNovedoso.id);
+        if (el) {
+            if (poderNovedoso.id === "p-sharingan") {
+                el.style.display = 'flex';
+            } else {
+                el.style.display = 'block';
+            }
         }
 
         renderizarLista();
@@ -309,10 +361,10 @@
             return;
         }
 
-        const textoFinal = `Ficha de Personaje:\nNombre: ${nombre}\nPoderes:\n${lista}`;
+        const textoFinal = `Ficha de Personaje:\nNombre: ${nombre}\nPoderes y Equipamiento:\n${lista}`;
 
         navigator.clipboard.writeText(textoFinal).then(() => {
-            alert("¡Ficha copiada! Pégala en la IA para simular el combate.");
+            alert("¡Ficha copiada! Pégala en el chat con la IA para iniciar el combate.");
         });
     }
 </script>
