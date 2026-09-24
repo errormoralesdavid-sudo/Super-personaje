@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Luchadores</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f1a;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: auto;
+        }
+
+        /* Stage del Personaje */
+        .character-stage {
+            position: relative;
+            width: 280px;
+            height: 380px;
+            margin: 20px auto;
+            background: #1a1a2e;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Capas visuales del personaje */
+        .layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: all 0.5s ease;
+        }
+
+        .base-character {
+            width: 140px;
+            height: 260px;
+            background: #555; /* Representación en gris */
+            border-radius: 70px 70px 20px 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Capas de poderes (Efectos CSS) */
+        .aura-fuego {
+            box-shadow: inset 0 0 50px #ff4500, 0 0 50px #ff4500;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .aura-rayo {
+            box-shadow: inset 0 0 50px #00d2ff, 0 0 60px #00d2ff;
+            border-radius: 50%;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* Botón Ruleta */
+        .btn-spin {
+            background: linear-gradient(45deg, #ff007f, #7928ca);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
+            margin-top: 15px;
+        }
+
+        .powers-list {
+            text-align: left;
+            background: #16213e;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>⚡ Creador de Héroes ⚡</h2>
+
+    <!-- Visualización del Personaje -->
+    <div class="character-stage" id="stage">
+        <div id="auraLayer" class="layer"></div>
+        <div class="base-character" id="base"></div>
+    </div>
+
+    <button class="btn-spin" onclick="girarRuleta()">🎲 Girar Ruleta de Poderes</button>
+
+    <div class="powers-list">
+        <h3>Poderes Equipados:</h3>
+        <ul id="listaPoderes">
+            <li><em>Sujeto en estado base (Gris)</em></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const poderesDisponibles = [
+        { nombre: "🔥 Aura de Fuego Infinito", efecto: "aura-fuego" },
+        { nombre: "⚡ Velocidad de Rayo", efecto: "aura-rayo" },
+        { nombre: "🛡️ Escudo Telequinético", efecto: "escudo" },
+        { nombre: "🦇 Alas de Sombra", efecto: "alas" },
+        { nombre: "🤖 Brazos Ciber-Mecánicos", efecto: "ciber" }
+    ];
+
+    let poderesObtenidos = [];
+
+    function girarRuleta() {
+        // Seleccionar poder aleatorio
+        const poder = poderesDisponibles[Math.floor(Math.random() * poderesDisponibles.length)];
+        
+        if (!poderesObtenidos.includes(poder.nombre)) {
+            poderesObtenidos.push(poder.nombre);
+            
+            // Aplicar cambio visual
+            if (poder.efecto === 'aura-fuego') {
+                document.getElementById('auraLayer').className = 'layer aura-fuego';
+            } else if (poder.efecto === 'aura-rayo') {
+                document.getElementById('auraLayer').className = 'layer aura-rayo';
+            }
+
+            // Actualizar Lista
+            actualizarLista();
+        } else {
+            alert("¡Ya tienes este poder! Gira de nuevo.");
+        }
+    }
+
+    function actualizarLista() {
+        const listEl = document.getElementById('listaPoderes');
+        listEl.innerHTML = poderesObtenidos.map(p => `<li>${p}</li>`).join('');
+    }
+</script>
+
+</body>
+</html>
