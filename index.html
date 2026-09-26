@@ -236,6 +236,38 @@
     .btn-tara { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 10px; font-weight: 800; font-size: 0.78rem; color: white; cursor: pointer; margin-top: 4px; }
 
     /* ESTILO CÁMARA FRONTAL EN TABLET */
+    // 1. Solicitar acceso a la cámara frontal con la mejor resolución posible
+async function iniciarCamaraFrontal() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "user", // "user" para frontal, "environment" para trasera
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    });
+
+    const videoElement = document.getElementById('video'); // Tu elemento <video>
+    videoElement.srcObject = stream;
+
+    // 2. Obtener el "track" de video para aplicar el Autofocus
+    const videoTrack = stream.getVideoTracks()[0];
+    const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+
+    // 3. Verificar si el dispositivo soporta ajuste de enfoque
+    if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+      await videoTrack.applyConstraints({
+        advanced: [{ focusMode: 'continuous' }]
+      });
+      console.log("Autofocus continuo activado con éxito.");
+    } else {
+      console.warn("El hardware de esta cámara frontal no soporta autofocus continuo programable.");
+    }
+
+  } catch (error) {
+    console.error("Error al acceder a la cámara:", error);
+  }
+    }
     #video-scanner { width: 100%; height: 280px; object-fit: cover; border-radius: 20px; background: #000; transform: scaleX(-1); /* Espejo para cámara frontal */ }
 
     .seccion-autopago {
