@@ -250,6 +250,30 @@
     .msg-error { color: #dc2626; }
     .msg-cargando { color: #ca8a04; }
 
+    /* TECLADO VIRTUAL TÁCTIL (KEYPAD) */
+    .keypad-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .keypad-btn {
+      padding: 12px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      color: var(--text);
+      border-radius: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.1s, transform 0.1s;
+    }
+    .keypad-btn:active {
+      transform: scale(0.95);
+      background: rgba(0,0,0,0.1);
+    }
+
     input, select { font-size: 0.95rem; }
   </style>
 </head>
@@ -346,18 +370,39 @@
     </button>
   </div>
 
-  <!-- MODAL DE CONFIRMACIÓN DE COMPRA -->
+  <!-- MODAL DE CONFIRMACIÓN DE COMPRA / AJUSTE MANUAL DE PESO -->
   <div class="modal" id="modal-confirmar">
     <div class="modal-contenido" style="text-align: center;">
       <h2 id="modal-prod-nombre" style="font-weight:900; font-size:1.4rem;">Producto</h2>
-      <img id="modal-prod-img" src="" style="width: 150px; height: 150px; border-radius: 22px; margin: 14px 0; object-fit: cover; box-shadow:0 8px 20px rgba(0,0,0,0.15);">
-      <p style="font-size: 1.15rem; color:var(--text-muted); font-weight:700;">Peso registrado: <b id="modal-peso" style="color:var(--text);">0</b> g</p>
+      <img id="modal-prod-img" src="" style="width: 130px; height: 130px; border-radius: 22px; margin: 10px 0; object-fit: cover; box-shadow:0 8px 20px rgba(0,0,0,0.15);">
       
-      <div id="modal-descuento-info" style="font-size:0.9rem; font-weight:800; color:#e76f51; margin-top:4px;"></div>
+      <!-- INPUT DE PESO BLOQUEADO PARA ENTRADA FÍSICA / NATIVA -->
+      <div style="margin: 8px 0;">
+        <label style="font-size: 0.85rem; font-weight:800; color:var(--text-muted);">Peso (g):</label>
+        <input type="text" id="modal-input-peso" readonly inputmode="none" style="width: 100%; text-align: center; font-size: 1.5rem; font-weight: 900; padding: 6px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--card-bg); color: var(--text);">
+      </div>
 
-      <div style="background: var(--accent); padding: 16px; border-radius: 20px; margin: 14px 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
-        <div style="font-size: 1.85rem; color: var(--primary); font-weight:900;">$<span id="modal-subtotal-usd">0.00</span></div>
-        <div style="font-size: 1.25rem; color: var(--primary-dark); font-weight:800;">Bs. <span id="modal-subtotal-bs">0.00</span></div>
+      <!-- KEYPAD NATIVO TÁCTIL PARA EVITAR DESPLIEGUE DE TECLADO MÓVIL -->
+      <div class="keypad-container">
+        <button class="keypad-btn" onclick="keypadPresionar('1')">1</button>
+        <button class="keypad-btn" onclick="keypadPresionar('2')">2</button>
+        <button class="keypad-btn" onclick="keypadPresionar('3')">3</button>
+        <button class="keypad-btn" onclick="keypadPresionar('4')">4</button>
+        <button class="keypad-btn" onclick="keypadPresionar('5')">5</button>
+        <button class="keypad-btn" onclick="keypadPresionar('6')">6</button>
+        <button class="keypad-btn" onclick="keypadPresionar('7')">7</button>
+        <button class="keypad-btn" onclick="keypadPresionar('8')">8</button>
+        <button class="keypad-btn" onclick="keypadPresionar('9')">9</button>
+        <button class="keypad-btn" onclick="keypadBorrar()">⌫</button>
+        <button class="keypad-btn" onclick="keypadPresionar('0')">0</button>
+        <button class="keypad-btn" onclick="keypadLimpiar()">C</button>
+      </div>
+      
+      <div id="modal-descuento-info" style="font-size:0.9rem; font-weight:800; color:#e76f51; margin-top:8px;"></div>
+
+      <div style="background: var(--accent); padding: 12px; border-radius: 20px; margin: 10px 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+        <div style="font-size: 1.7rem; color: var(--primary); font-weight:900;">$<span id="modal-subtotal-usd">0.00</span></div>
+        <div style="font-size: 1.15rem; color: var(--primary-dark); font-weight:800;">Bs. <span id="modal-subtotal-bs">0.00</span></div>
       </div>
 
       <div style="display: flex; gap: 12px;">
@@ -562,6 +607,11 @@
     const SUPABASE_KEY = 'TU_SUPABASE_ANON_KEY';
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // FUNCIÓN PARA CORREGIR IMPRECISIÓN DE DECIMALES DE JAVASCRIPT
+    function fixFloat(value) {
+      return Math.round((value + Number.EPSILON) * 100) / 100;
+    }
+
     window.validarPagoSupabase = async function() {
       const rawInput = document.getElementById('ref-pago-input').value.trim();
       const msgDiv = document.getElementById('msg-autopago');
@@ -579,7 +629,7 @@
         return;
       }
 
-      const totalBsCarrito = window.carrito.reduce((sum, item) => sum + item.subtotalBs, 0);
+      const totalBsCarrito = fixFloat(window.carrito.reduce((sum, item) => sum + item.subtotalBs, 0));
       const refInput = rawInput.slice(-6);
 
       btnValidar.disabled = true;
@@ -607,7 +657,7 @@
               break;
             }
 
-            const montoBanco = parseFloat(registro.monto || 0);
+            const montoBanco = fixFloat(parseFloat(registro.monto || 0));
             if (Math.abs(montoBanco - totalBsCarrito) <= 0.50) {
               montoValido = true;
               docEncontrado = registro;
@@ -775,6 +825,38 @@
       }
     }
 
+    /* LÓGICA DE TECLADO VIRTUAL TÁCTIL (KEYPAD) */
+    function keypadPresionar(val) {
+      const input = document.getElementById('modal-input-peso');
+      if (input.value === '0') input.value = val;
+      else input.value += val;
+      recalcularSubtotalModal();
+    }
+
+    function keypadBorrar() {
+      const input = document.getElementById('modal-input-peso');
+      input.value = input.value.slice(0, -1);
+      if (input.value === '') input.value = '0';
+      recalcularSubtotalModal();
+    }
+
+    function keypadLimpiar() {
+      const input = document.getElementById('modal-input-peso');
+      input.value = '0';
+      recalcularSubtotalModal();
+    }
+
+    function recalcularSubtotalModal() {
+      if (!productoTemp) return;
+      let pGramos = parseInt(document.getElementById('modal-input-peso').value) || 0;
+      const estadoOferta = calcularEstadoOferta(productoTemp);
+      const subtotalUsd = fixFloat((pGramos / 1000) * estadoOferta.precioFinal);
+      const subtotalBs = fixFloat(subtotalUsd * tasaBCV);
+
+      document.getElementById('modal-subtotal-usd').innerText = subtotalUsd.toFixed(2);
+      document.getElementById('modal-subtotal-bs').innerText = subtotalBs.toFixed(2);
+    }
+
     /* CAPTURA/SELECCIÓN DE IMÁGENES Y SUBIDA A SUPABASE */
     function manejarSeleccionImagen(event, prevKey) {
       const file = event.target.files[0];
@@ -881,7 +963,8 @@
       `;
 
       window.carrito.forEach(item => {
-        totalUsd += item.subtotalUsd; totalBs += item.subtotalBs;
+        totalUsd = fixFloat(totalUsd + item.subtotalUsd);
+        totalBs = fixFloat(totalBs + item.subtotalBs);
         html += `
           <b>${item.nombre}</b> (${item.peso}g)<br>
           $${item.subtotalUsd.toFixed(2)} | Bs. ${item.subtotalBs.toFixed(2)}<br>
@@ -1080,7 +1163,7 @@
       lista.forEach(p => {
         const estadoOferta = calcularEstadoOferta(p);
         let precioEfectivo = estadoOferta.precioFinal;
-        let precioBs = precioEfectivo * tasaBCV;
+        let precioBs = fixFloat(precioEfectivo * tasaBCV);
 
         let badgeHtml = estadoOferta.descuento > 0 ? `<div class="${estadoOferta.descuento === 50 ? 'badge-remate' : 'badge-oferta'}">${estadoOferta.etiqueta}</div>` : '';
         let barcodeHtml = p.codigoBarras ? `<div class="badge-barcode">#${p.codigoBarras}</div>` : '';
@@ -1121,30 +1204,27 @@
         return;
       }
 
-      if (pesoNeto === 0) {
-        alert("Peso en 0g. Toca la balanza superior para colocar un peso simulado.");
-      }
-
-      const estadoOferta = calcularEstadoOferta(productoTemp);
-      const subtotalUsd = (pesoNeto / 1000) * estadoOferta.precioFinal;
-      const subtotalBs = subtotalUsd * tasaBCV;
-      
       document.getElementById('modal-prod-nombre').innerText = productoTemp.nombre;
       document.getElementById('modal-prod-img').src = productoTemp.img;
-      document.getElementById('modal-peso').innerText = pesoNeto;
+      document.getElementById('modal-input-peso').value = pesoNeto;
+
+      const estadoOferta = calcularEstadoOferta(productoTemp);
       document.getElementById('modal-descuento-info').innerText = estadoOferta.descuento > 0 ? `🔥 Oferta de Lote: ${estadoOferta.etiqueta}` : '';
 
-      document.getElementById('modal-subtotal-usd').innerText = subtotalUsd.toFixed(2);
-      document.getElementById('modal-subtotal-bs').innerText = subtotalBs.toFixed(2);
-      
+      recalcularSubtotalModal();
       abrirModal('modal-confirmar');
     }
 
     function confirmarAgregar(e) {
-      let pesoNeto = obtenerPesoNeto();
+      let pesoNeto = parseInt(document.getElementById('modal-input-peso').value) || 0;
+      if (pesoNeto <= 0) {
+        alert("Ingresa un peso válido mayor a 0g.");
+        return;
+      }
+
       const estadoOferta = calcularEstadoOferta(productoTemp);
-      const subtotalUsd = (pesoNeto / 1000) * estadoOferta.precioFinal;
-      const subtotalBs = subtotalUsd * tasaBCV;
+      const subtotalUsd = fixFloat((pesoNeto / 1000) * estadoOferta.precioFinal);
+      const subtotalBs = fixFloat(subtotalUsd * tasaBCV);
 
       window.carrito.push({
         id: productoTemp.id,
@@ -1200,7 +1280,8 @@
         contenedor.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:15px; font-weight:700;">El carrito está vacío</p>';
       } else {
         window.carrito.forEach((item, index) => {
-          totalUsd += item.subtotalUsd; totalBs += item.subtotalBs;
+          totalUsd = fixFloat(totalUsd + item.subtotalUsd);
+          totalBs = fixFloat(totalBs + item.subtotalBs);
           contenedor.innerHTML += `
             <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
               <div>
@@ -1233,8 +1314,8 @@
 
     function actualizarReporteAdmin() {
       let ventasHoy = ventasHistorial.filter(v => v.fecha === hoyStr);
-      let totalUsd = ventasHoy.reduce((acc, v) => acc + v.totalUsd, 0);
-      let totalBs = ventasHoy.reduce((acc, v) => acc + v.totalBs, 0);
+      let totalUsd = fixFloat(ventasHoy.reduce((acc, v) => acc + v.totalUsd, 0));
+      let totalBs = fixFloat(ventasHoy.reduce((acc, v) => acc + v.totalBs, 0));
 
       document.getElementById('rep-tickets').innerText = ventasHoy.length;
       document.getElementById('rep-total-usd').innerText = "$" + totalUsd.toFixed(2);
