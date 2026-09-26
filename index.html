@@ -10,6 +10,8 @@
   <script src="https://unpkg.com/@zxing/library@latest"></script>
   <!-- Librería Html5Qrcode para decodificación mediante captura de foto/archivo -->
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary: #2d6a4f;
@@ -238,10 +240,6 @@
     .btn-admin-header { background: var(--glass-bg); color: white; border: 1px solid var(--glass-border); padding: 8px 14px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; font-weight: 800; backdrop-filter: blur(8px); }
     .btn-tara { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 10px; font-weight: 800; font-size: 0.78rem; color: white; cursor: pointer; margin-top: 4px; }
 
-    /* ESTILO CÁMARA AUTOFOCUS */
-    #video-scanner { width: 100%; height: 280px; object-fit: cover; border-radius: 20px; background: #000; }
-    .video-mirror { transform: scaleX(-1); }
-
     .seccion-autopago {
       background: rgba(0,0,0,0.04); padding: 14px; border-radius: 18px; margin: 14px 0; border: 1px solid var(--glass-border); text-align: left;
     }
@@ -303,11 +301,13 @@
         <div class="buscador-container">
           <input type="text" class="input-busqueda" id="input-buscar" placeholder="🔍 Buscar producto..." oninput="buscarProductosDirecto()">
           <button class="btn-icon-search" id="btn-voz" onclick="iniciarReconocimientoVoz()" title="Buscar por voz">🎙️</button>
-          <button class="btn-icon-search" onclick="abrirEscanerCamara('kiosco')" title="Escanear cámara en vivo (F2)">📷</button>
           
-          <!-- BOTÓN E INPUT PARA ESCANEAR VÍA FOTO (CÁMARA TRASERA) -->
-          <input type="file" id="input-foto-kiosco" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoCodigoBarras(this.files[0], 'kiosco')">
-          <button class="btn-icon-search" onclick="document.getElementById('input-foto-kiosco').click()" title="Tomar foto de código de barras">📸</button>
+          <!-- CONTROLES CAPTURA Y GALERÍA KIOSCO -->
+          <input type="file" id="input-camera-kiosco" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoCodigoBarras(this.files[0], 'kiosco')">
+          <input type="file" id="input-gallery-kiosco" accept="image/*" style="display: none;" onchange="procesarFotoCodigoBarras(this.files[0], 'kiosco')">
+
+          <button class="btn-icon-search" onclick="document.getElementById('input-camera-kiosco').click()" title="Tomar Foto Instantánea">📷</button>
+          <button class="btn-icon-search" onclick="document.getElementById('input-gallery-kiosco').click()" title="Subir desde Galería">🖼️</button>
         </div>
       </div>
 
@@ -346,24 +346,7 @@
     </button>
   </div>
 
-  <!-- MODAL ESCÁNER CON AUTOFOCUS CONTINUO -->
-  <div class="modal" id="modal-escaner">
-    <div class="modal-contenido" style="text-align: center;">
-      <h2 style="font-weight:900; margin-bottom: 8px;">Escanear Código de Barras</h2>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 14px;">Muestre el código frente a la cámara (Autofocus Activado)</p>
-      
-      <div style="position:relative; overflow:hidden; border-radius:20px; border:2px solid var(--primary-light);">
-        <video id="video-scanner" playsinline></video>
-      </div>
-
-      <div style="display: flex; gap: 8px; margin-top: 14px;">
-        <button class="btn-action" onclick="alternarModoCamara()" style="flex:1; background:rgba(0,0,0,0.08); color:var(--text); font-size:0.85rem;">🔄 Cambiar Cámara</button>
-        <button class="btn-action" onclick="cerrarEscanerCamara()" style="flex:1; background:var(--glass-border); color:var(--text); font-size:0.85rem;">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL DE CONFIRMACIÓN -->
+  <!-- MODAL DE CONFIRMACIÓN DE COMPRA -->
   <div class="modal" id="modal-confirmar">
     <div class="modal-contenido" style="text-align: center;">
       <h2 id="modal-prod-nombre" style="font-weight:900; font-size:1.4rem;">Producto</h2>
@@ -395,11 +378,11 @@
         <div style="font-size: 1.2rem; font-weight:800; color:var(--text-muted);">Bs. <span id="cart-total-bs">0.00</span></div>
       </div>
 
-      <!-- AUTOPAGO DE PAGO MÓVIL FIRESTORE -->
+      <!-- AUTOPAGO DE PAGO MÓVIL SUPABASE -->
       <div class="seccion-autopago">
         <label for="ref-pago-input">📱 Validar Pago Móvil en Kiosco:</label>
         <input type="number" id="ref-pago-input" placeholder="Ingresa N° Referencia (ej. 123456)">
-        <button class="btn-action" id="btn-validar-pago" onclick="validarPagoFirestore()" style="width:100%; background:var(--orange); color:white; padding:12px; font-size:1.05rem;">Validar Pago Móvil ⚡</button>
+        <button class="btn-action" id="btn-validar-pago" onclick="validarPagoSupabase()" style="width:100%; background:var(--orange); color:white; padding:12px; font-size:1.05rem;">Validar Pago Móvil ⚡</button>
         <div id="msg-autopago"></div>
       </div>
 
@@ -428,7 +411,7 @@
     </div>
   </div>
 
-  <!-- MODAL ADMIN -->
+  <!-- MODAL ADMIN CON GESTIÓN COMPLETA Y EDICIÓN -->
   <div class="modal" id="modal-admin">
     <div class="modal-contenido">
       <h2 style="margin-bottom:16px; font-weight:900;">Panel de Control Admin</h2>
@@ -460,9 +443,9 @@
         <button class="btn-action" onclick="actualizarLogo()" style="width:100%; background:rgba(0,0,0,0.08); color:var(--text); padding:10px;">Cambiar Logo</button>
       </div>
 
-      <!-- FORMULARIO AGREGAR PRODUCTO CON BOTONES ESCÁNER Y CAPTURA FOTO ADMIN -->
+      <!-- FORMULARIO AGREGAR / CREAR PRODUCTO -->
       <div style="background:rgba(0,0,0,0.04); padding:14px; border-radius:18px; margin-bottom:14px; border:1px solid rgba(0,0,0,0.08);">
-        <h4 style="margin-bottom:8px; font-weight:800;">🍎 Agregar / Editar Producto</h4>
+        <h4 style="margin-bottom:8px; font-weight:800;">🍎 Registrar Nuevo Producto</h4>
         <input type="text" id="adm-nombre" placeholder="Nombre (ej. Fresa de Montaña)" style="width:100%; padding:10px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:600;">
         
         <select id="adm-categoria" style="width:100%; padding:10px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:700;">
@@ -481,10 +464,12 @@
         <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted); display:block; margin-bottom:3px;">🏷️ Código de Barras:</label>
         <div style="display:flex; gap:6px; margin-bottom:8px;">
           <input type="text" id="adm-codigo-barras" placeholder="Ej: 759123456789" style="flex:1; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:600;">
-          <button class="btn-action" onclick="abrirEscanerCamara('admin')" style="background:var(--primary); color:white; padding:10px; font-size:0.85rem;" title="Escanear Cámara en Vivo">📷 Vivo</button>
           
-          <input type="file" id="input-foto-admin" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoCodigoBarras(this.files[0], 'admin')">
-          <button class="btn-action" onclick="document.getElementById('input-foto-admin').click()" style="background:var(--orange); color:white; padding:10px; font-size:0.85rem;" title="Capturar Foto">📸 Foto</button>
+          <input type="file" id="input-camera-admin" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotoCodigoBarras(this.files[0], 'admin')">
+          <input type="file" id="input-gallery-admin" accept="image/*" style="display: none;" onchange="procesarFotoCodigoBarras(this.files[0], 'admin')">
+
+          <button class="btn-action" onclick="document.getElementById('input-camera-admin').click()" style="background:var(--primary); color:white; padding:10px; font-size:0.85rem;" title="Capturar Foto Código">📷 Foto</button>
+          <button class="btn-action" onclick="document.getElementById('input-gallery-admin').click()" style="background:var(--orange); color:white; padding:10px; font-size:0.85rem;" title="Galería">🖼️ Galería</button>
         </div>
 
         <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted); display:block; margin-bottom:3px;">📅 Días de vida útil (Perecibilidad):</label>
@@ -493,8 +478,27 @@
         <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted); display:block; margin-bottom:3px;">📦 Fecha de Ingreso del Lote:</label>
         <input type="date" id="adm-fecha-ingreso" style="width:100%; padding:10px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:600;">
 
-        <input type="text" id="adm-img" placeholder="URL Imagen (https://...)" style="width:100%; padding:10px; margin-bottom:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:600;">
-        <button class="btn-action" onclick="guardarProductoAdmin()" style="width:100%; background:var(--primary); color:white; padding:10px;">Guardar Producto</button>
+        <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted); display:block; margin-bottom:3px;">📷 Imagen del Producto:</label>
+        <div style="display:flex; gap:6px; margin-bottom:8px;">
+          <button type="button" class="btn-action" onclick="document.getElementById('img-camera-add').click()" style="flex:1; background:var(--primary); color:white; padding:8px; font-size:0.8rem;">📷 Tomar Foto</button>
+          <button type="button" class="btn-action" onclick="document.getElementById('img-gallery-add').click()" style="flex:1; background:rgba(0,0,0,0.1); color:var(--text); padding:8px; font-size:0.8rem;">🖼️ Galería</button>
+        </div>
+        <input type="file" id="img-camera-add" accept="image/*" capture="environment" style="display:none;" onchange="manejarSeleccionImagen(event, 'prev-add')">
+        <input type="file" id="img-gallery-add" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event, 'prev-add')">
+
+        <div id="prev-add-box" style="display:none; margin-bottom:8px; text-align:center;">
+          <img id="prev-add-img" src="" style="width:90px; height:90px; object-fit:cover; border-radius:12px; border:1px solid rgba(0,0,0,0.15);">
+        </div>
+
+        <button class="btn-action" id="btn-guardar-prod" onclick="guardarProductoAdmin()" style="width:100%; background:var(--primary); color:white; padding:10px;">Guardar Producto</button>
+      </div>
+
+      <!-- INVENTARIO Y MODIFICACIÓN DE PRODUCTOS -->
+      <div style="background:rgba(0,0,0,0.04); padding:14px; border-radius:18px; margin-bottom:14px; border:1px solid rgba(0,0,0,0.08);">
+        <h4 style="margin-bottom:8px; font-weight:800;">📋 Administrar Inventario</h4>
+        <div id="lista-admin-productos" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+          <!-- Lista de productos con botón de edición -->
+        </div>
       </div>
 
       <div style="background:rgba(0,0,0,0.04); padding:14px; border-radius:18px; margin-bottom:14px; border:1px solid rgba(0,0,0,0.08);">
@@ -507,24 +511,58 @@
     </div>
   </div>
 
-  <!-- FIREBASE FIRESTORE SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <!-- MODAL EDITAR PRODUCTO -->
+  <div class="modal" id="modal-editar-producto">
+    <div class="modal-contenido">
+      <h3 style="margin-bottom:12px; font-weight:900;">✏️ Editar Producto</h3>
+      <input type="hidden" id="edit-prod-id">
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAsBnDGC_E_oSoKrewTbmkrmw2JAjdcalU",
-      authDomain: "geomercado-9d642.firebaseapp.com",
-      projectId: "geomercado-9d642",
-      storageBucket: "geomercado-9d642.appspot.com",
-      messagingSenderId: "521126894575",
-      appId: "1:521126894575:web:4c847de3dd57d6a430b7a"
-    };
+      <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted);">Nombre:</label>
+      <input type="text" id="edit-prod-nombre" style="width:100%; padding:8px; margin-bottom:8px; border-radius:10px; border:1px solid rgba(0,0,0,0.15); font-weight:600;">
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+      <div style="display:flex; gap:8px;">
+        <div style="flex:1;">
+          <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted);">Precio ($):</label>
+          <input type="number" step="0.01" id="edit-prod-precio" style="width:100%; padding:8px; margin-bottom:8px; border-radius:10px; border:1px solid rgba(0,0,0,0.15); font-weight:600;">
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted);">Categoría:</label>
+          <select id="edit-prod-categoria" style="width:100%; padding:8px; margin-bottom:8px; border-radius:10px; border:1px solid rgba(0,0,0,0.15); font-weight:700;">
+            <option value="Frutería">Frutería</option>
+            <option value="Verdulería">Verdulería</option>
+            <option value="Manicería">Manicería</option>
+            <option value="Granos">Granos</option>
+            <option value="Charcutería">Charcutería</option>
+          </select>
+        </div>
+      </div>
 
-    window.validarPagoFirestore = async function() {
+      <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted);">Cambiar Imagen (Captura/Galería):</label>
+      <div style="display:flex; gap:6px; margin-bottom:8px;">
+        <button type="button" class="btn-action" onclick="document.getElementById('img-camera-edit').click()" style="flex:1; background:var(--primary); color:white; padding:8px; font-size:0.8rem;">📷 Foto</button>
+        <button type="button" class="btn-action" onclick="document.getElementById('img-gallery-edit').click()" style="flex:1; background:rgba(0,0,0,0.1); color:var(--text); padding:8px; font-size:0.8rem;">🖼️ Galería</button>
+      </div>
+      <input type="file" id="img-camera-edit" accept="image/*" capture="environment" style="display:none;" onchange="manejarSeleccionImagen(event, 'prev-edit')">
+      <input type="file" id="img-gallery-edit" accept="image/*" style="display:none;" onchange="manejarSeleccionImagen(event, 'prev-edit')">
+
+      <div style="text-align:center; margin-bottom:10px;">
+        <img id="prev-edit-img" src="" style="width:90px; height:90px; object-fit:cover; border-radius:12px; border:1px solid rgba(0,0,0,0.15);">
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <button class="btn-action" onclick="cerrarModal('modal-editar-producto')" style="flex:1; background:rgba(0,0,0,0.1); color:var(--text);">Cancelar</button>
+        <button class="btn-action" id="btn-guardar-edit" onclick="guardarCambiosEdicion()" style="flex:1; background:var(--primary); color:white;">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIGURACIÓN SUPABASE & INTEGRACIÓN CLIENTE -->
+  <script>
+    const SUPABASE_URL = 'https://TU_SUPABASE_URL.supabase.co';
+    const SUPABASE_KEY = 'TU_SUPABASE_ANON_KEY';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    window.validarPagoSupabase = async function() {
       const rawInput = document.getElementById('ref-pago-input').value.trim();
       const msgDiv = document.getElementById('msg-autopago');
       const btnValidar = document.getElementById('btn-validar-pago');
@@ -549,29 +587,30 @@
       msgDiv.innerText = "⏳ Verificando pago y monto en el banco...";
 
       try {
-        const pagosRef = collection(db, "verificacion_pagos");
-        const q = query(pagosRef, where("referencia_6digitos", "==", refInput));
-        const querySnapshot = await getDocs(q);
+        const { data, error } = await supabase
+          .from('verificacion_pagos')
+          .select('*')
+          .eq('referencia_6digitos', refInput);
 
-        if (!querySnapshot.empty) {
+        if (error) throw error;
+
+        if (data && data.length > 0) {
           let yaProcesado = false;
           let montoValido = false;
           let docEncontrado = null;
 
-          for (const docSnap of querySnapshot.docs) {
-            const data = docSnap.data();
-
-            if (data.estado === "PROCESADO") {
+          for (const registro of data) {
+            if (registro.estado === "PROCESADO") {
               msgDiv.className = "msg-error";
               msgDiv.innerText = "⚠️ Esta referencia ya fue utilizada previamente.";
               yaProcesado = true;
               break;
             }
 
-            const montoBanco = parseFloat(data.monto || 0);
+            const montoBanco = parseFloat(registro.monto || 0);
             if (Math.abs(montoBanco - totalBsCarrito) <= 0.50) {
               montoValido = true;
-              docEncontrado = docSnap;
+              docEncontrado = registro;
             } else {
               msgDiv.className = "msg-error";
               msgDiv.innerText = `❌ El monto pagado (${montoBanco.toFixed(2)} Bs) no coincide con el total del carrito (${totalBsCarrito.toFixed(2)} Bs).`;
@@ -581,10 +620,13 @@
           }
 
           if (!yaProcesado && montoValido && docEncontrado) {
-            await updateDoc(docEncontrado.ref, {
-              estado: "PROCESADO",
-              fecha_procesado: new Date().toISOString()
-            });
+            await supabase
+              .from('verificacion_pagos')
+              .update({
+                estado: "PROCESADO",
+                fecha_procesado: new Date().toISOString()
+              })
+              .eq('id', docEncontrado.id);
 
             msgDiv.className = "msg-exito";
             msgDiv.innerText = "✅ ¡Pago Confirmado! Generando Ticket...";
@@ -602,7 +644,7 @@
           msgDiv.innerText = "❌ Referencia no encontrada. Verifique el número.";
         }
       } catch (error) {
-        console.error("Error al consultar Firestore:", error);
+        console.error("Error al consultar Supabase:", error);
         msgDiv.className = "msg-error";
         msgDiv.innerText = "❌ Error de conexión al verificar pago.";
       } finally {
@@ -611,7 +653,7 @@
     };
   </script>
 
-  <!-- LÓGICA PRINCIPAL -->
+  <!-- LÓGICA PRINCIPAL DEL APLICATIVO POS -->
   <script>
     let tasaBCV = parseFloat(localStorage.getItem('bascula_tasa_bcv')) || 36.50;
     let claveAdmin = localStorage.getItem('bascula_clave_admin') || "1234";
@@ -623,11 +665,7 @@
     let categoriaSeleccionada = "";
     let temporizadorInactividad = null;
     let datosUltimoTicket = null;
-    
-    // VARIABLES PARA CÁMARA Y ESCÁNER CON AUTOFOCUS
-    let codeReader = null;
-    let modoCamaraTrasera = true; 
-    let origenEscaner = 'kiosco'; // 'kiosco' o 'admin'
+    let archivosImagenes = { 'prev-add': null, 'prev-edit': null };
 
     let ventasHistorial = JSON.parse(localStorage.getItem('bascula_ventas_historial')) || [];
 
@@ -685,20 +723,16 @@
         document.body.classList.add('dark-mode');
       }
 
-      // REGISTRO DE ATAJOS TECLADO RÁPIDOS
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'F2') {
-          e.preventDefault();
-          abrirEscanerCamara('kiosco');
-        } else if (e.key === 'F4') {
+        if (e.key === 'F4') {
           e.preventDefault();
           abrirCarrito();
         } else if (e.key === 'Escape') {
-          cerrarModal('modal-escaner');
           cerrarModal('modal-confirmar');
           cerrarModal('modal-carrito');
           cerrarModal('modal-ticket');
           cerrarModal('modal-admin');
+          cerrarModal('modal-editar-producto');
         }
       });
     });
@@ -711,7 +745,6 @@
       const btn = document.getElementById('btn-sincronizar');
       if (btn) btn.innerText = "⏳ Consultando Tasa Al Momento...";
       try {
-        // ENDPOINT PRINCIPAL PREFERIDO
         const resPrimary = await fetch('https://rates.dolarvzla.com/bcv/current.json', { cache: 'no-cache' });
         if (resPrimary.ok) {
           const dataPrimary = await resPrimary.json();
@@ -739,6 +772,40 @@
         }
       } finally {
         if (btn) btn.innerText = "🔄 Sincronizar Tasa BCV (DolarApi / Rates)";
+      }
+    }
+
+    /* CAPTURA/SELECCIÓN DE IMÁGENES Y SUBIDA A SUPABASE */
+    function manejarSeleccionImagen(event, prevKey) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      archivosImagenes[prevKey] = file;
+      const imgElem = document.getElementById(`${prevKey}-img`);
+      imgElem.src = URL.createObjectURL(file);
+
+      const boxContainer = document.getElementById(`${prevKey}-box`);
+      if (boxContainer) boxContainer.style.display = 'block';
+    }
+
+    async function subirImagenSupabase(file) {
+      if (!file) return null;
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `products/${fileName}`;
+
+        const { data, error } = await supabase.storage.from('product-images').upload(filePath, file);
+        if (error) {
+          console.error('Error subiendo imagen a Supabase Storage:', error);
+          return null;
+        }
+
+        const { data: publicData } = supabase.storage.from('product-images').getPublicUrl(filePath);
+        return publicData.publicUrl;
+      } catch (e) {
+        console.error('Fallo en subida de imagen:', e);
+        return null;
       }
     }
 
@@ -770,117 +837,11 @@
         console.error("Error al decodificar la foto:", error);
         alert("❌ No se pudo detectar ningún código de barras en la imagen. Intenta con mejor iluminación o más de cerca.");
       } finally {
-        // Limpiar inputs file para permitir volver a escanear el mismo archivo si es necesario
-        document.getElementById('input-foto-kiosco').value = "";
-        document.getElementById('input-foto-admin').value = "";
+        document.getElementById('input-camera-kiosco').value = "";
+        document.getElementById('input-gallery-kiosco').value = "";
+        document.getElementById('input-camera-admin').value = "";
+        document.getElementById('input-gallery-admin').value = "";
       }
-    }
-
-    /* MÓDULO DE ESCÁNER ULTRA RÁPIDO CON AUTOFOCUS CONTINUO EN VIVO */
-    function abrirEscanerCamara(origen = 'kiosco') {
-      origenEscaner = origen;
-      abrirModal('modal-escaner');
-      iniciarStreamingCamara();
-    }
-
-    async function iniciarStreamingCamara() {
-      const videoElem = document.getElementById('video-scanner');
-      
-      if (modoCamaraTrasera) {
-        videoElem.classList.remove('video-mirror');
-      } else {
-        videoElem.classList.add('video-mirror');
-      }
-
-      if (codeReader) {
-        codeReader.reset();
-      }
-      codeReader = new ZXing.BrowserMultiFormatReader();
-
-      const facingModeMode = modoCamaraTrasera ? "environment" : "user";
-      
-      const constraints = {
-        video: {
-          facingMode: { ideal: facingModeMode },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          focusMode: { ideal: "continuous" }
-        }
-      };
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoElem.srcObject = stream;
-
-        // ACTIVAR AUTOFOCUS CONTINUO MEDIANTE STREAM TRACKS
-        const videoTrack = stream.getVideoTracks()[0];
-        if (videoTrack && videoTrack.getCapabilities) {
-          const capabilities = videoTrack.getCapabilities();
-          if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-            try {
-              await videoTrack.applyConstraints({
-                advanced: [{ focusMode: 'continuous' }]
-              });
-              console.log("Autofocus continuo activado en el hardware.");
-            } catch (e) {
-              console.warn("Autofocus continuo no soportado por este lente específico.", e);
-            }
-          }
-        }
-
-        codeReader.decodeFromVideoElement(videoElem, (result, err) => {
-          if (result) {
-            const codigoEscaneado = result.text.trim();
-            reproducirSonido('scan');
-            cerrarEscanerCamara();
-            
-            if (origenEscaner === 'admin') {
-              document.getElementById('adm-codigo-barras').value = codigoEscaneado;
-            } else {
-              const prodEncontrado = productos.find(p => p.codigoBarras === codigoEscaneado);
-              if (prodEncontrado) {
-                seleccionarProducto(prodEncontrado.id);
-              } else {
-                document.getElementById('input-buscar').value = codigoEscaneado;
-                buscarProductosDirecto();
-                alert("Código de barras (" + codigoEscaneado + ") no encontrado en catálogo.");
-              }
-            }
-          }
-        });
-
-      } catch (err) {
-        console.error("Error al acceder a la cámara con Autofocus:", err);
-        // Respaldo genérico por dispositivos
-        codeReader.decodeFromVideoDevice(null, 'video-scanner', (result) => {
-          if (result) {
-            const codigo = result.text.trim();
-            reproducirSonido('scan');
-            cerrarEscanerCamara();
-            if (origenEscaner === 'admin') {
-              document.getElementById('adm-codigo-barras').value = codigo;
-            } else {
-              let p = productos.find(x => x.codigoBarras === codigo);
-              if (p) seleccionarProducto(p.id);
-            }
-          }
-        });
-      }
-    }
-
-    function alternarModoCamara() {
-      modoCamaraTrasera = !modoCamaraTrasera;
-      iniciarStreamingCamara();
-    }
-
-    function cerrarEscanerCamara() {
-      const videoElem = document.getElementById('video-scanner');
-      if (videoElem.srcObject) {
-        videoElem.srcObject.getTracks().forEach(track => track.stop());
-        videoElem.srcObject = null;
-      }
-      if (codeReader) codeReader.reset();
-      cerrarModal('modal-escaner');
     }
 
     function generarTicket(estadoPago = 'PENDIENTE') {
@@ -1358,7 +1319,10 @@
 
     function solicitarAccesoAdmin() {
       const pass = prompt("Ingrese contraseña Admin:");
-      if (pass === claveAdmin) abrirModal('modal-admin');
+      if (pass === claveAdmin) {
+        renderizarListaAdmin();
+        abrirModal('modal-admin');
+      }
       else if (pass !== null) alert("Contraseña incorrecta.");
     }
 
@@ -1375,7 +1339,9 @@
       if (url) { logoUrl = url; localStorage.setItem('bascula_logo_url', logoUrl); aplicarLogo(); alert("Logo actualizado."); }
     }
 
-    function guardarProductoAdmin() {
+    /* GUARDAR / CREAR PRODUCTO */
+    async function guardarProductoAdmin() {
+      const btn = document.getElementById('btn-guardar-prod');
       const nombre = document.getElementById('adm-nombre').value;
       const categoria = document.getElementById('adm-categoria').value;
       const precio = parseFloat(document.getElementById('adm-precio').value);
@@ -1383,18 +1349,116 @@
       const codigoBarras = document.getElementById('adm-codigo-barras').value.trim();
       const diasVida = parseInt(document.getElementById('adm-dias-vida').value) || 5;
       const fechaIngreso = document.getElementById('adm-fecha-ingreso').value || hoyStr;
-      const img = document.getElementById('adm-img').value || 'https://via.placeholder.com/200?text=Producto';
 
-      if (nombre && precio) {
-        productos.push({ id: Date.now(), nombre, categoria, precioKg: precio, stockGramos, codigoBarras, diasVida, fechaIngreso, img });
-        localStorage.setItem('bascula_productos', JSON.stringify(productos));
-        alert("Producto guardado exitosamente.");
-        document.getElementById('adm-nombre').value = '';
-        document.getElementById('adm-precio').value = '';
-        document.getElementById('adm-codigo-barras').value = '';
-        document.getElementById('adm-img').value = '';
-        if (categoriaSeleccionada) filtrarPorCategoria(categoriaSeleccionada);
-      } else alert("Ingresa nombre y precio.");
+      if (!nombre || isNaN(precio)) { alert("Ingresa nombre y precio válido."); return; }
+
+      btn.disabled = true;
+      btn.innerText = "Guardando...";
+
+      let imgUrl = 'https://via.placeholder.com/200?text=Producto';
+      if (archivosImagenes['prev-add']) {
+        const subida = await subirImagenSupabase(archivosImagenes['prev-add']);
+        if (subida) imgUrl = subida;
+      }
+
+      productos.push({ id: Date.now(), nombre, categoria, precioKg: precio, stockGramos, codigoBarras, diasVida, fechaIngreso, img: imgUrl });
+      localStorage.setItem('bascula_productos', JSON.stringify(productos));
+
+      alert("Producto registrado exitosamente.");
+
+      // Limpiar Formulario
+      document.getElementById('adm-nombre').value = '';
+      document.getElementById('adm-precio').value = '';
+      document.getElementById('adm-codigo-barras').value = '';
+      archivosImagenes['prev-add'] = null;
+      document.getElementById('prev-add-box').style.display = 'none';
+
+      btn.disabled = false;
+      btn.innerText = "Guardar Producto";
+
+      renderizarListaAdmin();
+      if (categoriaSeleccionada) filtrarPorCategoria(categoriaSeleccionada);
+    }
+
+    /* RENDER Y EDICIÓN DE PRODUCTOS */
+    function renderizarListaAdmin() {
+      const container = document.getElementById('lista-admin-productos');
+      container.innerHTML = '';
+
+      if (productos.length === 0) {
+        container.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">No hay productos en inventario.</p>';
+        return;
+      }
+
+      productos.forEach(p => {
+        container.innerHTML += `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--card-bg); padding:8px 12px; border-radius:12px; border:1px solid rgba(0,0,0,0.1);">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <img src="${p.img}" style="width:36px; height:36px; object-fit:cover; border-radius:8px;">
+              <div>
+                <b style="font-size:0.9rem;">${p.nombre}</b>
+                <div style="font-size:0.78rem; color:var(--text-muted);">$${p.precioKg.toFixed(2)} /kg | ${p.categoria}</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:4px;">
+              <button onclick='abrirModalEditar(${JSON.stringify(p)})' style="background:#f59e0b; color:white; border:none; padding:6px 10px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Editar</button>
+              <button onclick="eliminarProductoAdmin(${p.id})" style="background:#ef4444; color:white; border:none; padding:6px 10px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Borrar</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function abrirModalEditar(p) {
+      document.getElementById('edit-prod-id').value = p.id;
+      document.getElementById('edit-prod-nombre').value = p.nombre;
+      document.getElementById('edit-prod-precio').value = p.precioKg;
+      document.getElementById('edit-prod-categoria').value = p.categoria || 'Frutería';
+      document.getElementById('prev-edit-img').src = p.img;
+
+      archivosImagenes['prev-edit'] = null;
+      abrirModal('modal-editar-producto');
+    }
+
+    async function guardarCambiosEdicion() {
+      const id = parseInt(document.getElementById('edit-prod-id').value);
+      const nombre = document.getElementById('edit-prod-nombre').value;
+      const precio = parseFloat(document.getElementById('edit-prod-precio').value);
+      const categoria = document.getElementById('edit-prod-categoria').value;
+      const btn = document.getElementById('btn-guardar-edit');
+
+      let prodIndex = productos.findIndex(p => p.id === id);
+      if (prodIndex === -1) return;
+
+      btn.disabled = true;
+      btn.innerText = "Guardando...";
+
+      productos[prodIndex].nombre = nombre;
+      productos[prodIndex].precioKg = precio;
+      productos[prodIndex].categoria = categoria;
+
+      if (archivosImagenes['prev-edit']) {
+        const nuevaUrl = await subirImagenSupabase(archivosImagenes['prev-edit']);
+        if (nuevaUrl) productos[prodIndex].img = nuevaUrl;
+      }
+
+      localStorage.setItem('bascula_productos', JSON.stringify(productos));
+      alert("Producto actualizado correctamente.");
+
+      btn.disabled = false;
+      btn.innerText = "Guardar Cambios";
+
+      cerrarModal('modal-editar-producto');
+      renderizarListaAdmin();
+      if (categoriaSeleccionada) filtrarPorCategoria(categoriaSeleccionada);
+    }
+
+    function eliminarProductoAdmin(id) {
+      if (!confirm("¿Seguro que deseas eliminar este producto?")) return;
+      productos = productos.filter(p => p.id !== id);
+      localStorage.setItem('bascula_productos', JSON.stringify(productos));
+      renderizarListaAdmin();
+      if (categoriaSeleccionada) filtrarPorCategoria(categoriaSeleccionada);
     }
 
     async function conectarBLE() {
