@@ -235,40 +235,9 @@
     .btn-admin-header { background: var(--glass-bg); color: white; border: 1px solid var(--glass-border); padding: 8px 14px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; font-weight: 800; backdrop-filter: blur(8px); }
     .btn-tara { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 10px; font-weight: 800; font-size: 0.78rem; color: white; cursor: pointer; margin-top: 4px; }
 
-    /* ESTILO CÁMARA FRONTAL EN TABLET */
-    // 1. Solicitar acceso a la cámara frontal con la mejor resolución posible
-async function iniciarCamaraFrontal() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: "user", // "user" para frontal, "environment" para trasera
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    });
-
-    const videoElement = document.getElementById('video'); // Tu elemento <video>
-    videoElement.srcObject = stream;
-
-    // 2. Obtener el "track" de video para aplicar el Autofocus
-    const videoTrack = stream.getVideoTracks()[0];
-    const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
-
-    // 3. Verificar si el dispositivo soporta ajuste de enfoque
-    if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-      await videoTrack.applyConstraints({
-        advanced: [{ focusMode: 'continuous' }]
-      });
-      console.log("Autofocus continuo activado con éxito.");
-    } else {
-      console.warn("El hardware de esta cámara frontal no soporta autofocus continuo programable.");
-    }
-
-  } catch (error) {
-    console.error("Error al acceder a la cámara:", error);
-  }
-    }
-    #video-scanner { width: 100%; height: 280px; object-fit: cover; border-radius: 20px; background: #000; transform: scaleX(-1); /* Espejo para cámara frontal */ }
+    /* ESTILO CÁMARA AUTOFOCUS */
+    #video-scanner { width: 100%; height: 280px; object-fit: cover; border-radius: 20px; background: #000; }
+    .video-mirror { transform: scaleX(-1); }
 
     .seccion-autopago {
       background: rgba(0,0,0,0.04); padding: 14px; border-radius: 18px; margin: 14px 0; border: 1px solid var(--glass-border); text-align: left;
@@ -328,7 +297,7 @@ async function iniciarCamaraFrontal() {
         <div class="buscador-container">
           <input type="text" class="input-busqueda" id="input-buscar" placeholder="🔍 Buscar producto..." oninput="buscarProductosDirecto()">
           <button class="btn-icon-search" id="btn-voz" onclick="iniciarReconocimientoVoz()" title="Buscar por voz">🎙️</button>
-          <button class="btn-icon-search" onclick="abrirEscanerCamara()" title="Escanear código de barras (Cámara Frontal)">📷</button>
+          <button class="btn-icon-search" onclick="abrirEscanerCamara('kiosco')" title="Escanear código de barras (Autofocus)">📷</button>
         </div>
       </div>
 
@@ -367,17 +336,20 @@ async function iniciarCamaraFrontal() {
     </button>
   </div>
 
-  <!-- MODAL ESCÁNER CON CÁMARA FRONTAL -->
+  <!-- MODAL ESCÁNER CON AUTOFOCUS CONTINUO -->
   <div class="modal" id="modal-escaner">
     <div class="modal-contenido" style="text-align: center;">
       <h2 style="font-weight:900; margin-bottom: 8px;">Escanear Código de Barras</h2>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 14px;">Muestre el código frente a la cámara de la tablet</p>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 14px;">Muestre el código frente a la cámara (Autofocus Activado)</p>
       
       <div style="position:relative; overflow:hidden; border-radius:20px; border:2px solid var(--primary-light);">
         <video id="video-scanner" playsinline></video>
       </div>
 
-      <button class="btn-action" onclick="cerrarEscanerCamara()" style="width:100%; margin-top:16px; background:var(--glass-border); color:var(--text);">Cancelar Escaneo</button>
+      <div style="display: flex; gap: 8px; margin-top: 14px;">
+        <button class="btn-action" onclick="alternarModoCamara()" style="flex:1; background:rgba(0,0,0,0.08); color:var(--text); font-size:0.85rem;">🔄 Cambiar Cámara</button>
+        <button class="btn-action" onclick="cerrarEscanerCamara()" style="flex:1; background:var(--glass-border); color:var(--text); font-size:0.85rem;">Cancelar</button>
+      </div>
     </div>
   </div>
 
@@ -423,7 +395,6 @@ async function iniciarCamaraFrontal() {
 
       <div style="display: flex; gap: 12px; margin-top:12px;">
         <button class="btn-action" onclick="cerrarModal('modal-carrito')" style="flex:1; background:rgba(0,0,0,0.08); color:var(--text);">Seguir Pesando</button>
-        <!-- TICKET PENDIENTE DE PAGO SI NO VALIDA EN KIOSCO -->
         <button class="btn-action" onclick="generarTicket('PENDIENTE')" style="flex:1; background:var(--primary); color:white;">Ticket para Caja 🧾</button>
       </div>
     </div>
@@ -479,6 +450,7 @@ async function iniciarCamaraFrontal() {
         <button class="btn-action" onclick="actualizarLogo()" style="width:100%; background:rgba(0,0,0,0.08); color:var(--text); padding:10px;">Cambiar Logo</button>
       </div>
 
+      <!-- FORMULARIO AGREGAR PRODUCTO CON BOTÓN ESCÁNER ADMIN -->
       <div style="background:rgba(0,0,0,0.04); padding:14px; border-radius:18px; margin-bottom:14px; border:1px solid rgba(0,0,0,0.08);">
         <h4 style="margin-bottom:8px; font-weight:800;">🍎 Agregar / Editar Producto</h4>
         <input type="text" id="adm-nombre" placeholder="Nombre (ej. Fresa de Montaña)" style="width:100%; padding:10px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:600;">
@@ -496,8 +468,11 @@ async function iniciarCamaraFrontal() {
         <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted); display:block; margin-bottom:3px;">📦 Stock inicial disponible (Gramos o Unidades):</label>
         <input type="number" id="adm-stock" placeholder="Ej: 5000 (para 5kg) ó 50 (unidades)" value="10000" style="width:100%; padding:10px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:600;">
 
-        <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted); display:block; margin-bottom:3px;">🏷️ Código de Barras (Opcional):</label>
-        <input type="text" id="adm-codigo-barras" placeholder="Ej: 759123456789" style="width:100%; padding:10px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:600;">
+        <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted); display:block; margin-bottom:3px;">🏷️ Código de Barras:</label>
+        <div style="display:flex; gap:6px; margin-bottom:8px;">
+          <input type="text" id="adm-codigo-barras" placeholder="Ej: 759123456789" style="flex:1; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:600;">
+          <button class="btn-action" onclick="abrirEscanerCamara('admin')" style="background:var(--primary); color:white; padding:10px; font-size:0.85rem;" title="Escanear Código">📷 Escanear</button>
+        </div>
 
         <label style="font-size:0.82rem; font-weight:800; color:var(--text-muted); display:block; margin-bottom:3px;">📅 Días de vida útil (Perecibilidad):</label>
         <input type="number" id="adm-dias-vida" placeholder="Ej: 3 (Fresa) ó 10 (Papa)" value="5" style="width:100%; padding:10px; margin-bottom:8px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:600;">
@@ -519,109 +494,109 @@ async function iniciarCamaraFrontal() {
     </div>
   </div>
 
-<!-- FIREBASE FIRESTORE SDK CON GENERACIÓN DE TICKET "PAGADO" -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <!-- FIREBASE FIRESTORE SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAsBnDGC_E_oSoKrewTbmkrmw2JAjdcalU",
-    authDomain: "geomercado-9d642.firebaseapp.com",
-    projectId: "geomercado-9d642",
-    storageBucket: "geomercado-9d642.appspot.com",
-    messagingSenderId: "521126894575",
-    appId: "1:521126894575:web:4c847de3dd57d6a430b7a"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAsBnDGC_E_oSoKrewTbmkrmw2JAjdcalU",
+      authDomain: "geomercado-9d642.firebaseapp.com",
+      projectId: "geomercado-9d642",
+      storageBucket: "geomercado-9d642.appspot.com",
+      messagingSenderId: "521126894575",
+      appId: "1:521126894575:web:4c847de3dd57d6a430b7a"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  window.validarPagoFirestore = async function() {
-    const rawInput = document.getElementById('ref-pago-input').value.trim();
-    const msgDiv = document.getElementById('msg-autopago');
-    const btnValidar = document.getElementById('btn-validar-pago');
+    window.validarPagoFirestore = async function() {
+      const rawInput = document.getElementById('ref-pago-input').value.trim();
+      const msgDiv = document.getElementById('msg-autopago');
+      const btnValidar = document.getElementById('btn-validar-pago');
 
-    if (!rawInput) {
-      msgDiv.className = "msg-error";
-      msgDiv.innerText = "❌ Por favor ingresa el número de referencia.";
-      return;
-    }
-
-    if (!window.carrito || window.carrito.length === 0) {
-      msgDiv.className = "msg-error";
-      msgDiv.innerText = "❌ El carrito está vacío.";
-      return;
-    }
-
-    const totalBsCarrito = window.carrito.reduce((sum, item) => sum + item.subtotalBs, 0);
-    const refInput = rawInput.slice(-6);
-
-    btnValidar.disabled = true;
-    msgDiv.className = "msg-cargando";
-    msgDiv.innerText = "⏳ Verificando pago y monto en el banco...";
-
-    try {
-      const pagosRef = collection(db, "verificacion_pagos");
-      const q = query(pagosRef, where("referencia_6digitos", "==", refInput));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        let yaProcesado = false;
-        let montoValido = false;
-        let docEncontrado = null;
-
-        for (const docSnap of querySnapshot.docs) {
-          const data = docSnap.data();
-
-          if (data.estado === "PROCESADO") {
-            msgDiv.className = "msg-error";
-            msgDiv.innerText = "⚠️ Esta referencia ya fue utilizada previamente.";
-            yaProcesado = true;
-            break;
-          }
-
-          const montoBanco = parseFloat(data.monto || 0);
-          if (Math.abs(montoBanco - totalBsCarrito) <= 0.50) {
-            montoValido = true;
-            docEncontrado = docSnap;
-          } else {
-            msgDiv.className = "msg-error";
-            msgDiv.innerText = `❌ El monto pagado (${montoBanco.toFixed(2)} Bs) no coincide con el total del carrito (${totalBsCarrito.toFixed(2)} Bs).`;
-            btnValidar.disabled = false;
-            return;
-          }
-        }
-
-        if (!yaProcesado && montoValido && docEncontrado) {
-          await updateDoc(docEncontrado.ref, {
-            estado: "PROCESADO",
-            fecha_procesado: new Date().toISOString()
-          });
-
-          msgDiv.className = "msg-exito";
-          msgDiv.innerText = "✅ ¡Pago Confirmado! Generando Ticket...";
-          if (window.reproducirSonido) window.reproducirSonido('scan');
-
-          setTimeout(() => {
-            if (window.generarTicket) window.generarTicket('PAGADO');
-            document.getElementById('ref-pago-input').value = "";
-            msgDiv.innerText = "";
-          }, 1000);
-        }
-
-      } else {
+      if (!rawInput) {
         msgDiv.className = "msg-error";
-        msgDiv.innerText = "❌ Referencia no encontrada. Verifique el número.";
+        msgDiv.innerText = "❌ Por favor ingresa el número de referencia.";
+        return;
       }
-    } catch (error) {
-      console.error("Error al consultar Firestore:", error);
-      msgDiv.className = "msg-error";
-      msgDiv.innerText = "❌ Error de conexión al verificar pago.";
-    } finally {
-      btnValidar.disabled = false;
-    }
-  };
-</script>
+
+      if (!window.carrito || window.carrito.length === 0) {
+        msgDiv.className = "msg-error";
+        msgDiv.innerText = "❌ El carrito está vacío.";
+        return;
+      }
+
+      const totalBsCarrito = window.carrito.reduce((sum, item) => sum + item.subtotalBs, 0);
+      const refInput = rawInput.slice(-6);
+
+      btnValidar.disabled = true;
+      msgDiv.className = "msg-cargando";
+      msgDiv.innerText = "⏳ Verificando pago y monto en el banco...";
+
+      try {
+        const pagosRef = collection(db, "verificacion_pagos");
+        const q = query(pagosRef, where("referencia_6digitos", "==", refInput));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          let yaProcesado = false;
+          let montoValido = false;
+          let docEncontrado = null;
+
+          for (const docSnap of querySnapshot.docs) {
+            const data = docSnap.data();
+
+            if (data.estado === "PROCESADO") {
+              msgDiv.className = "msg-error";
+              msgDiv.innerText = "⚠️ Esta referencia ya fue utilizada previamente.";
+              yaProcesado = true;
+              break;
+            }
+
+            const montoBanco = parseFloat(data.monto || 0);
+            if (Math.abs(montoBanco - totalBsCarrito) <= 0.50) {
+              montoValido = true;
+              docEncontrado = docSnap;
+            } else {
+              msgDiv.className = "msg-error";
+              msgDiv.innerText = `❌ El monto pagado (${montoBanco.toFixed(2)} Bs) no coincide con el total del carrito (${totalBsCarrito.toFixed(2)} Bs).`;
+              btnValidar.disabled = false;
+              return;
+            }
+          }
+
+          if (!yaProcesado && montoValido && docEncontrado) {
+            await updateDoc(docEncontrado.ref, {
+              estado: "PROCESADO",
+              fecha_procesado: new Date().toISOString()
+            });
+
+            msgDiv.className = "msg-exito";
+            msgDiv.innerText = "✅ ¡Pago Confirmado! Generando Ticket...";
+            if (window.reproducirSonido) window.reproducirSonido('scan');
+
+            setTimeout(() => {
+              if (window.generarTicket) window.generarTicket('PAGADO');
+              document.getElementById('ref-pago-input').value = "";
+              msgDiv.innerText = "";
+            }, 1000);
+          }
+
+        } else {
+          msgDiv.className = "msg-error";
+          msgDiv.innerText = "❌ Referencia no encontrada. Verifique el número.";
+        }
+      } catch (error) {
+        console.error("Error al consultar Firestore:", error);
+        msgDiv.className = "msg-error";
+        msgDiv.innerText = "❌ Error de conexión al verificar pago.";
+      } finally {
+        btnValidar.disabled = false;
+      }
+    };
+  </script>
 
   <!-- LÓGICA PRINCIPAL -->
   <script>
@@ -635,7 +610,11 @@ async function iniciarCamaraFrontal() {
     let categoriaSeleccionada = "";
     let temporizadorInactividad = null;
     let datosUltimoTicket = null;
+    
+    // VARIABLES PARA CÁMARA Y ESCÁNER CON AUTOFOCUS
     let codeReader = null;
+    let modoCamaraTrasera = true; 
+    let origenEscaner = 'kiosco'; // 'kiosco' o 'admin'
 
     let ventasHistorial = JSON.parse(localStorage.getItem('bascula_ventas_historial')) || [];
 
@@ -683,7 +662,6 @@ async function iniciarCamaraFrontal() {
       actualizarDisplaysTasa();
       actualizarDisplayPeso();
       
-      // NUEVA API: DOLARAPI (DOLAR OFICIAL AL MOMENTO EN VIVO)
       obtenerTasaBCVOnline();
       
       iniciarMonitoreoInactividad();
@@ -699,24 +677,20 @@ async function iniciarCamaraFrontal() {
       obtenerTasaBCVOnline();
     });
 
-    /* PUNTO 1: NUEVA API DIRECTA DEL DÓLAR OFICIAL AL MOMENTO */
     async function obtenerTasaBCVOnline() {
       const btn = document.getElementById('btn-sincronizar');
       if (btn) btn.innerText = "⏳ Consultando Tasa Al Momento...";
       try {
-        // DolarApi.com - API oficial en vivo para Venezuela
         const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial', { cache: 'no-cache' });
         if (!response.ok) throw new Error("Error HTTP: " + response.status);
         const data = await response.json();
         
-        // Obtenemos la tasa promedio oficial en vivo
         let tasaAlMomento = data.promedio || data.precio;
         if (tasaAlMomento && !isNaN(tasaAlMomento) && tasaAlMomento > 0) {
           guardarTasaEnStorage(parseFloat(tasaAlMomento));
         }
       } catch (err) {
         console.warn("Fallo en DolarApi, probando API secundaria...", err);
-        // Respaldo secundario PyDolar
         try {
           const res2 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
           const data2 = await res2.json();
@@ -732,51 +706,113 @@ async function iniciarCamaraFrontal() {
       }
     }
 
-    /* PUNTO 3: CÁMARA FRONTAL EN TABLET */
-    function abrirEscanerCamara() {
+    /* MÓDULO DE ESCÁNER ULTRA RÁPIDO CON AUTOFOCUS CONTINUO */
+    function abrirEscanerCamara(origen = 'kiosco') {
+      origenEscaner = origen;
       abrirModal('modal-escaner');
-      codeReader = new ZXing.BrowserMultiFormatReader();
+      iniciarStreamingCamara();
+    }
+
+    async function iniciarStreamingCamara() {
+      const videoElem = document.getElementById('video-scanner');
       
-      // Forzar la cámara frontal con constraints facingMode: "user"
+      if (modoCamaraTrasera) {
+        videoElem.classList.remove('video-mirror');
+      } else {
+        videoElem.classList.add('video-mirror');
+      }
+
+      if (codeReader) {
+        codeReader.reset();
+      }
+      codeReader = new ZXing.BrowserMultiFormatReader();
+
+      const facingModeMode = modoCamaraTrasera ? "environment" : "user";
+      
       const constraints = {
-        video: { facingMode: "user" }
+        video: {
+          facingMode: { ideal: facingModeMode },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          focusMode: { ideal: "continuous" }
+        }
       };
 
-      codeReader.decodeFromConstraints(constraints, 'video-scanner', (result) => {
-        if (result) {
-          const codigoEscaneado = result.text.trim();
-          reproducirSonido('scan');
-          cerrarEscanerCamara();
-          const prodEncontrado = productos.find(p => p.codigoBarras === codigoEscaneado);
-          if (prodEncontrado) {
-            seleccionarProducto(prodEncontrado.id);
-          } else {
-            document.getElementById('input-buscar').value = codigoEscaneado;
-            buscarProductosDirecto();
-            alert("Código de barras (" + codigoEscaneado + ") no registrado.");
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoElem.srcObject = stream;
+
+        // ACTIVAR AUTOFOCUS CONTINUO MEDIANTE STREAM TRACKS
+        const videoTrack = stream.getVideoTracks()[0];
+        if (videoTrack && videoTrack.getCapabilities) {
+          const capabilities = videoTrack.getCapabilities();
+          if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+            try {
+              await videoTrack.applyConstraints({
+                advanced: [{ focusMode: 'continuous' }]
+              });
+              console.log("Autofocus continuo activado en el hardware.");
+            } catch (e) {
+              console.warn("Autofocus continuo no soportado por este lente específico.", e);
+            }
           }
         }
-      }).catch(err => { 
-        console.error("Error al iniciar cámara frontal:", err);
-        // Si la tablet no soporta la restricción estricta, usar método genérico
+
+        codeReader.decodeFromVideoElement(videoElem, (result, err) => {
+          if (result) {
+            const codigoEscaneado = result.text.trim();
+            reproducirSonido('scan');
+            cerrarEscanerCamara();
+            
+            if (origenEscaner === 'admin') {
+              document.getElementById('adm-codigo-barras').value = codigoEscaneado;
+            } else {
+              const prodEncontrado = productos.find(p => p.codigoBarras === codigoEscaneado);
+              if (prodEncontrado) {
+                seleccionarProducto(prodEncontrado.id);
+              } else {
+                document.getElementById('input-buscar').value = codigoEscaneado;
+                buscarProductosDirecto();
+                alert("Código de barras (" + codigoEscaneado + ") no encontrado en catálogo.");
+              }
+            }
+          }
+        });
+
+      } catch (err) {
+        console.error("Error al acceder a la cámara con Autofocus:", err);
+        // Respaldo genérico por dispositivos
         codeReader.decodeFromVideoDevice(null, 'video-scanner', (result) => {
           if (result) {
             const codigo = result.text.trim();
             reproducirSonido('scan');
             cerrarEscanerCamara();
-            let p = productos.find(x => x.codigoBarras === codigo);
-            if (p) seleccionarProducto(p.id);
+            if (origenEscaner === 'admin') {
+              document.getElementById('adm-codigo-barras').value = codigo;
+            } else {
+              let p = productos.find(x => x.codigoBarras === codigo);
+              if (p) seleccionarProducto(p.id);
+            }
           }
         });
-      });
+      }
+    }
+
+    function alternarModoCamara() {
+      modoCamaraTrasera = !modoCamaraTrasera;
+      iniciarStreamingCamara();
     }
 
     function cerrarEscanerCamara() {
+      const videoElem = document.getElementById('video-scanner');
+      if (videoElem.srcObject) {
+        videoElem.srcObject.getTracks().forEach(track => track.stop());
+        videoElem.srcObject = null;
+      }
       if (codeReader) codeReader.reset();
       cerrarModal('modal-escaner');
     }
 
-    /* PUNTO 2: LÓGICA DE TICKET "PAGADO" vs "PENDIENTE DE PAGO" */
     function generarTicket(estadoPago = 'PENDIENTE') {
       if (window.carrito.length === 0) { alert("Agregue al menos un producto al carrito."); return; }
       cerrarModal('modal-carrito');
