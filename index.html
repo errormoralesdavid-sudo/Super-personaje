@@ -8,74 +8,284 @@
   <meta name="theme-color" content="#00e676">
   <style>
     :root {
-      --bg-color: #121212;
-      --card-bg: #1e1e1e;
-      --input-bg: #2a2a2a;
+      --bg-color: #0d0f12;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      --input-bg: rgba(0, 0, 0, 0.35);
       --neon-green: #00e676;
+      --neon-green-glow: rgba(0, 230, 118, 0.3);
       --text-color: #ffffff;
       --text-muted: #b0bec5;
-      --border-color: #2e2e2e;
       --danger-color: #ff5252;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; transition: background 0.2s ease, transform 0.1s ease; }
-    body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 80px; overflow-x: hidden; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    body {
+      background: radial-gradient(circle at top left, #1a2a22, #0d0f12 70%);
+      color: var(--text-color);
+      padding-bottom: 90px;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
 
-    header { background-color: var(--card-bg); border-bottom: 2px solid var(--neon-green); padding: 15px; text-align: center; }
-    h1 { color: var(--neon-green); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+    header {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 15px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
 
-    .slider-container { display: flex; gap: 10px; overflow-x: auto; padding: 15px; scroll-snap-type: x mandatory; }
+    h1 {
+      color: var(--neon-green);
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 10px var(--neon-green-glow);
+    }
+
+    /* Slider con GLASS EFFECT */
+    .slider-container {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 15px;
+      scroll-snap-type: x mandatory;
+    }
     .slider-container::-webkit-scrollbar { display: none; }
-    .card-rate { flex: 0 0 65%; scroll-snap-align: center; background-color: var(--card-bg); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; transform: scale(1); }
-    .card-rate:active { transform: scale(0.98); }
-    .card-rate h3 { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-    .price { font-size: 18px; font-weight: bold; margin: 4px 0; }
+
+    .card-rate {
+      flex: 0 0 68%;
+      scroll-snap-align: center;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      padding: 14px;
+      border-radius: 16px;
+      text-align: center;
+    }
+    .card-rate:active { transform: scale(0.96); }
+    .card-rate h3 { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .price { font-size: 19px; font-weight: bold; margin: 6px 0; }
     .trend { font-size: 11px; font-weight: bold; }
     .trend.up { color: var(--neon-green); }
     .trend.down { color: var(--danger-color); }
 
-    .container { padding: 15px; max-width: 600px; margin: 0 auto; }
-    .calc-section { background-color: var(--card-bg); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color); margin-bottom: 15px; animation: fadeIn 0.3s ease; }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* Contenedor con Perspectiva 3D */
+    .container {
+      padding: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+      perspective: 1000px; /* Habilita espacio 3D */
     }
 
-    .calc-section h2 { font-size: 15px; color: var(--neon-green); text-align: center; margin-bottom: 12px; }
+    /* Estilo de Tarjetas GLASS */
+    .calc-section {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      padding: 20px;
+      border-radius: 18px;
+      margin-bottom: 18px;
+    }
 
-    label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 12px; }
-    input, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #424242; background-color: var(--input-bg); color: #fff; font-size: 14px; outline: none; margin-bottom: 10px; }
-    input:focus, select:focus { border-color: var(--neon-green); box-shadow: 0 0 5px rgba(0,230,118,0.3); }
+    .calc-section h2 {
+      font-size: 15px;
+      color: var(--neon-green);
+      text-align: center;
+      margin-bottom: 14px;
+      text-shadow: 0 0 8px var(--neon-green-glow);
+    }
 
-    .result-box { background-color: var(--input-bg); padding: 12px; border-radius: 8px; border-left: 4px solid var(--neon-green); margin-top: 10px; }
-    .result-line { margin: 6px 0; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+    label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 12px; }
+    
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: var(--input-bg);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    input:focus, select:focus {
+      border-color: var(--neon-green);
+      box-shadow: 0 0 12px var(--neon-green-glow);
+    }
+
+    .result-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--glass-border);
+      padding: 14px;
+      border-radius: 12px;
+      border-left: 4px solid var(--neon-green);
+      margin-top: 12px;
+    }
+    .result-line { margin: 7px 0; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
     .result-line span { color: var(--text-muted); }
     .result-line strong { color: #fff; }
 
-    .bank-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; max-height: 200px; overflow-y: auto; padding-right: 5px; }
-    .bank-btn, .binance-btn { background-color: var(--input-bg); border: 1px solid var(--border-color); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center; }
-    .bank-btn:hover, .bank-btn.active, .binance-btn:hover, .binance-btn.active { border-color: var(--neon-green); background-color: #1b3a2b; transform: scale(1.02); }
+    /* Desplegables de Bancos / Binance Plegables */
+    .accordion-btn {
+      width: 100%;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--neon-green);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease-out, opacity 0.25s ease;
+      opacity: 0;
+    }
+    .accordion-content.open {
+      max-height: 300px;
+      opacity: 1;
+      margin-bottom: 12px;
+    }
+
+    .bank-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      padding-top: 6px;
+    }
+    .bank-btn, .binance-btn {
+      background: var(--input-bg);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bank-btn:hover, .bank-btn.active, .binance-btn:hover, .binance-btn.active {
+      border-color: var(--neon-green);
+      background: rgba(0, 230, 118, 0.15);
+      box-shadow: 0 0 10px var(--neon-green-glow);
+    }
     .bank-badge { background: var(--neon-green); color: #000; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; }
 
-    .btn-action { background: var(--neon-green); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 14px; }
-    .btn-action:active { transform: scale(0.97); opacity: 0.9; }
-    .btn-copy { background: #2e2e2e; color: var(--neon-green); border: 1px solid var(--neon-green); padding: 6px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-top: 8px; width: 100%; }
-    .btn-copy:active { transform: scale(0.97); }
-    .btn-limpiar { background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); padding: 8px; border-radius: 8px; width: 100%; margin-bottom: 15px; cursor: pointer; font-size: 12px; }
-    .btn-delete { background: transparent; color: var(--danger-color); border: none; cursor: pointer; font-weight: bold; font-size: 14px; }
+    .btn-action {
+      background: var(--neon-green);
+      color: #000;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: bold;
+      width: 100%;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 4px 15px var(--neon-green-glow);
+    }
+    .btn-action:active { transform: scale(0.97); }
+    .btn-copy {
+      background: rgba(255,255,255,0.08);
+      color: var(--neon-green);
+      border: 1px solid var(--neon-green);
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .btn-limpiar {
+      background: transparent;
+      color: var(--danger-color);
+      border: 1px solid var(--danger-color);
+      padding: 9px;
+      border-radius: 10px;
+      width: 100%;
+      margin-bottom: 15px;
+      cursor: pointer;
+      font-size: 12px;
+    }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-    .nav-bar { position: fixed; bottom: 0; width: 100%; background-color: var(--card-bg); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; backdrop-filter: blur(10px); }
-    .nav-item { color: var(--text-muted); font-size: 10px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: color 0.2s ease; }
-    .nav-item.active { color: var(--neon-green); font-weight: bold; transform: translateY(-2px); }
+    /* Pestañas Animadas en 3D */
+    .tab-content {
+      display: none;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
+    .tab-content.active {
+      display: block;
+      animation: flipIn3D 0.45s ease-out forwards;
+    }
+
+    @keyframes flipIn3D {
+      0% {
+        opacity: 0;
+        transform: rotateY(-25deg) translateZ(-50px);
+      }
+      100% {
+        opacity: 1;
+        transform: rotateY(0deg) translateZ(0);
+      }
+    }
+
+    /* Barra de Navegación Glassmorphism */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      z-index: 100;
+      box-shadow: 0 -5px 25px rgba(0,0,0,0.5);
+    }
+    .nav-item {
+      color: var(--text-muted);
+      font-size: 10px;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-item.active {
+      color: var(--neon-green);
+      font-weight: bold;
+      transform: translateY(-3px) scale(1.08);
+      text-shadow: 0 0 8px var(--neon-green-glow);
+    }
 
     .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
-    .history-table th { color: var(--neon-green); border-bottom: 1px solid #424242; padding: 6px; text-align: left; }
-    .history-table td { padding: 8px 6px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    .history-table th { color: var(--neon-green); border-bottom: 1px solid var(--glass-border); padding: 8px; text-align: left; }
+    .history-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
     
-    .badge-info { background: #2a2a2a; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 6px; font-size: 10px; color: var(--neon-green); display: inline-block; margin-top: 4px; }
+    .status-badge { font-size: 10px; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.4); color: var(--neon-green); border: 1px solid var(--glass-border); display: inline-block; }
   </style>
 </head>
 <body>
@@ -87,22 +297,22 @@
   <div class="slider-container">
     <div class="card-rate">
       <h3>🏛️ BCV (Oficial)</h3>
-      <div class="price" id="rate-bcv">832,48 Bs</div>
+      <div class="price" id="rate-bcv">Cargando...</div>
       <div class="trend up" id="var-bcv">▲ +0,00%</div>
     </div>
     <div class="card-rate">
       <h3>🔶 USDT (Binance)</h3>
-      <div class="price" id="rate-usdt">885,10 Bs</div>
+      <div class="price" id="rate-usdt">Cargando...</div>
       <div class="trend up" id="var-usdt">▲ +0,00%</div>
     </div>
     <div class="card-rate">
       <h3>📊 Brecha (BCV/USDT)</h3>
-      <div class="price" id="rate-spread" style="color:var(--neon-green);">6,32%</div>
+      <div class="price" id="rate-spread" style="color:var(--neon-green);">0,00%</div>
       <div class="trend" style="color:var(--text-muted);">Diferencia</div>
     </div>
     <div class="card-rate">
       <h3>💶 Euro (€)</h3>
-      <div class="price" id="rate-eur">968,06 Bs</div>
+      <div class="price" id="rate-eur">Cargando...</div>
       <div class="trend" style="color:var(--text-muted);">Oficial BCV</div>
     </div>
     <div class="card-rate">
@@ -116,13 +326,13 @@
 
     <details class="calc-section" style="cursor:pointer;">
       <summary style="color:var(--neon-green); font-weight:bold; font-size:13px; text-align:center;">⚙️ Configuración y Tasas del Día</summary>
-      <div style="margin-top:12px;">
+      <div style="margin-top:14px;">
         
-        <div style="background:var(--input-bg); padding:10px; border-radius:8px; margin-bottom:12px; border:1px dashed var(--neon-green); text-align:center;">
-          <label style="color:var(--neon-green); margin-bottom:8px;">🌐 Sincronización de Tasas En Vivo:</label>
-          <div style="display:flex; gap:8px;">
-            <button class="btn-action" style="font-size:11px; padding:8px;" onclick="sincronizarDolarVzlaAPI()">🔄 BCV (DolarVZLA)</button>
-            <button class="btn-action" style="font-size:11px; padding:8px; background:#f0b90b; color:#000;" onclick="sincronizarBinanceP2P()">🔶 USDT (Binance P2P)</button>
+        <div style="background:var(--input-bg); padding:12px; border-radius:10px; margin-bottom:12px; border:1px dashed var(--neon-green); text-align:center;">
+          <div id="sync-status" class="status-badge">🔄 Sincronizando tasas en vivo...</div>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="btn-action" style="font-size:11px; padding:8px;" onclick="sincronizarDolarVzlaAPI(true)">🔄 Reintentar BCV</button>
+            <button class="btn-action" style="font-size:11px; padding:8px; background:#f0b90b; color:#000;" onclick="sincronizarBinanceP2P(true)">🔶 Reintentar Binance</button>
           </div>
         </div>
 
@@ -250,22 +460,34 @@
       <div class="calc-section">
         <h2>Comisiones de Compra Divisas / P2P</h2>
         
-        <label>1. Selecciona el Banco:</label>
-        <div class="bank-grid">
-          <div class="bank-btn active" onclick="seleccionarBancoComision(2.5, 'Banco de Venezuela (BdV)', this)"><span>🏛️ BdV</span><span class="bank-badge">2.5%</span></div>
-          <div class="bank-btn" onclick="seleccionarBancoComision(1.5, 'Banco Bicentenario (BDT)', this)"><span>👷 BDT</span><span class="bank-badge">1.5%</span></div>
-          <div class="bank-btn" onclick="seleccionarBancoComision(2.5, 'Banco del Tesoro', this)"><span>😇 B. Tesoro</span><span class="bank-badge">2.5%</span></div>
-          <div class="bank-btn" onclick="seleccionarBancoComision(1.5, 'Banesco', this)"><span>🔥 Banesco</span><span class="bank-badge">1.5%</span></div>
-          <div class="bank-btn" onclick="seleccionarBancoComision(1.5, 'BBVA Provincial', this)"><span>🔵 Provincial</span><span class="bank-badge">1.5%</span></div>
-          <div class="bank-btn" onclick="seleccionarBancoComision(1.5, 'BNC', this)"><span>😁 BNC</span><span class="bank-badge">1.5%</span></div>
+        <!-- DESPLEGABLE BANCOS -->
+        <button class="accordion-btn" onclick="toggleAccordion('acc-bancos')">
+          <span>🏛️ Seleccionar Banco Nacional</span>
+          <span id="label-banco-activo">BdV (2.5%) ▾</span>
+        </button>
+        <div id="acc-bancos" class="accordion-content">
+          <div class="bank-grid">
+            <div class="bank-btn active" onclick="seleccionarBancoComision(2.5, 'Banco de Venezuela (BdV)', this)"><span>🏛️ BdV</span><span class="bank-badge">2.5%</span></div>
+            <div class="bank-btn" onclick="seleccionarBancoComision(1.5, 'Banco Bicentenario (BDT)', this)"><span>👷 BDT</span><span class="bank-badge">1.5%</span></div>
+            <div class="bank-btn" onclick="seleccionarBancoComision(2.5, 'Banco del Tesoro', this)"><span>😇 B. Tesoro</span><span class="bank-badge">2.5%</span></div>
+            <div class="bank-btn" onclick="seleccionarBancoComision(1.5, 'Banesco', this)"><span>🔥 Banesco</span><span class="bank-badge">1.5%</span></div>
+            <div class="bank-btn" onclick="seleccionarBancoComision(1.5, 'BBVA Provincial', this)"><span>🔵 Provincial</span><span class="bank-badge">1.5%</span></div>
+            <div class="bank-btn" onclick="seleccionarBancoComision(1.5, 'BNC', this)"><span>😁 BNC</span><span class="bank-badge">1.5%</span></div>
+          </div>
         </div>
 
-        <label style="margin-top:8px;">2. Selecciona Comisión de Binance:</label>
-        <div class="bank-grid">
-          <div class="binance-btn active" onclick="seleccionarBinanceComision(0.0, 'Binance Maker (0%)', this)"><span>⚡ Maker</span><span class="bank-badge">0%</span></div>
-          <div class="binance-btn" onclick="seleccionarBinanceComision(0.1, 'Binance Taker (0.1%)', this)"><span>⚡ Taker</span><span class="bank-badge">0.1%</span></div>
-          <div class="binance-btn" onclick="seleccionarBinanceComision(0.2, 'Binance P2P / Otro (0.2%)', this)"><span>🤝 P2P Ref</span><span class="bank-badge">0.2%</span></div>
-          <div class="binance-btn" onclick="seleccionarBinanceComision(0.35, 'Binance Tarjeta / Otros', this)"><span>💳 Tarjeta</span><span class="bank-badge">0.35%</span></div>
+        <!-- DESPLEGABLE BINANCE -->
+        <button class="accordion-btn" onclick="toggleAccordion('acc-binance')">
+          <span>⚡ Seleccionar Opción Binance</span>
+          <span id="label-binance-activo">Maker (0%) ▾</span>
+        </button>
+        <div id="acc-binance" class="accordion-content">
+          <div class="bank-grid">
+            <div class="binance-btn active" onclick="seleccionarBinanceComision(0.0, 'Binance Maker (0%)', this)"><span>⚡ Maker</span><span class="bank-badge">0%</span></div>
+            <div class="binance-btn" onclick="seleccionarBinanceComision(0.1, 'Binance Taker (0.1%)', this)"><span>⚡ Taker</span><span class="bank-badge">0.1%</span></div>
+            <div class="binance-btn" onclick="seleccionarBinanceComision(0.2, 'Binance P2P / Otro (0.2%)', this)"><span>🤝 P2P Ref</span><span class="bank-badge">0.2%</span></div>
+            <div class="binance-btn" onclick="seleccionarBinanceComision(0.35, 'Binance Tarjeta / Otros', this)"><span>💳 Tarjeta</span><span class="bank-badge">0.35%</span></div>
+          </div>
         </div>
 
         <input type="hidden" id="banco-seleccionado-nombre" value="Banco de Venezuela (BdV)">
@@ -281,12 +503,23 @@
             <input type="number" id="com-porc-binance" value="0.0" oninput="calcularComisiones(1)">
           </div>
         </div>
-        
+
+        <!-- TERCERA COMISIÓN (MI GANANCIA / MARGEN AL FINAL) -->
+        <div style="background: rgba(0, 230, 118, 0.08); border: 1px solid var(--neon-green); padding: 12px; border-radius: 12px; margin-top: 10px;">
+          <label style="color: var(--neon-green); font-weight: bold;">💼 Mi Comisión / Margen Personal (Al Final):</label>
+          <input type="number" id="com-porc-personal" value="0" placeholder="Ej. 10, 30 o 50%" oninput="calcularComisiones(1)" style="margin-bottom:0;">
+        </div>
+
         <div class="result-box">
           <label>Envías desde el Banco ($):</label>
           <input type="number" id="com-envio-usd" placeholder="Ej. 100" oninput="calcularComisiones(1)">
-          <label>Te llega en USDT:</label>
-          <input type="number" id="com-recibo-usdt" placeholder="Ej. 97.5" oninput="calcularComisiones(2)" style="color:var(--neon-green);">
+          <label>Te llega en USDT (tras comisiones de red/banco):</label>
+          <input type="number" id="com-recibo-usdt" placeholder="Ej. 97.5" oninput="calcularComisiones(2)">
+          
+          <div class="result-line" style="margin-top:10px; border-top:1px dashed var(--glass-border); padding-top:8px;">
+            <span>Total Final con Mi Comisión:</span>
+            <strong id="com-res-total-personal" style="color:var(--neon-green); font-size:16px;">0.00 $</strong>
+          </div>
         </div>
       </div>
     </div>
@@ -298,7 +531,7 @@
         
         <div style="background:var(--input-bg); border:1px solid var(--neon-green); padding:10px; border-radius:8px; margin-bottom:12px;">
           <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Canal de Operación Activo:</div>
-          <div id="resumen-canal-activo" style="font-size:13px; font-weight:bold; color:var(--neon-green); margin-top:2px;">Banco de Venezuela (BdV) [2.5%] + Binance Maker (0%)</div>
+          <div id="resumen-canal-activo" style="font-size:12px; font-weight:bold; color:var(--neon-green); margin-top:2px;">Banco de Venezuela (BdV) [2.5%] + Binance Maker (0%)</div>
         </div>
 
         <label>Monto Inicial en Banco (Bs):</label>
@@ -315,24 +548,33 @@
           </div>
         </div>
 
+        <!-- TERCERA COMISIÓN EN ARBITRAJE -->
+        <div style="background: rgba(0, 230, 118, 0.08); border: 1px solid var(--neon-green); padding: 10px; border-radius: 10px; margin-bottom: 12px;">
+          <label style="color: var(--neon-green); font-weight: bold;">💼 Recargo / Mi Comisión Final (%):</label>
+          <input type="number" id="arb-com-personal" value="0" placeholder="Ej. 30%" oninput="calcularArbitraje()" style="margin-bottom:0;">
+        </div>
+
         <div class="result-box">
           <div class="result-line"><span>Punto de Equilibrio:</span> <strong id="arb-res-breakeven">0,00 Bs</strong></div>
           <div class="result-line"><span>Monto Final Venta:</span> <strong id="arb-res-final">0,00 Bs</strong></div>
           <div class="result-line"><span>Comisiones Totales (Bs):</span> <strong id="arb-res-comision-bs" style="color:var(--danger-color);">0,00 Bs</strong></div>
           <div class="result-line"><span>Ganancia Neta Real (Bs):</span> <strong id="arb-res-ganancia-bs">0,00 Bs</strong></div>
           <div class="result-line"><span>Ganancia Neta (USDT):</span> <strong id="arb-res-ganancia-usdt">0,00 USDT</strong></div>
-          <div class="result-line"><span>Ganancia Neta ($):</span> <strong id="arb-res-ganancia-usd">0,00 $</strong></div>
+          <div class="result-line" style="border-top:1px dashed var(--glass-border); padding-top:6px;">
+            <span>Ganancia Final + Mi Comisión ($):</span>
+            <strong id="arb-res-ganancia-usd" style="color:var(--neon-green); font-size:15px;">0,00 $</strong>
+          </div>
         </div>
 
         <label style="margin-top:10px;">Nota / Descripción de la operación:</label>
-        <input type="text" id="arb-nota" placeholder="Ej. Arbitraje BdV - Binance P2P">
+        <input type="text" id="arb-nota" placeholder="Ej. Cambio a cliente X con mi comisión">
 
         <button class="btn-action" style="margin-top:5px;" onclick="registrarOperacion()">💾 Registrar Operación</button>
       </div>
 
       <div class="calc-section">
         <h2>Historial Integrado</h2>
-        <input type="text" id="buscar-historial" placeholder="🔍 Filtrar por banco o nota..." oninput="filtrarHistorial()">
+        <input type="text" id="buscar-historial" placeholder="🔍 Filtrar historial..." oninput="filtrarHistorial()">
         <div style="overflow-x:auto;">
           <table class="history-table">
             <thead>
@@ -363,10 +605,26 @@
     window.onload = function() {
       cargarDatosGuardados();
       actualizarTasasManuales();
+      sincronizacionesIniciales();
     };
+
+    async function sincronizacionesIniciales() {
+      var statusEl = document.getElementById('sync-status');
+      if (statusEl) statusEl.innerText = '🔄 Autocargando tasas en vivo...';
+      
+      await sincronizarDolarVzlaAPI(false);
+      await sincronizarBinanceP2P(false);
+
+      if (statusEl) statusEl.innerText = '✅ Tasas sincronizadas automáticamente';
+    }
 
     function formato(num) {
       return Number(num).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function toggleAccordion(id) {
+      var content = document.getElementById(id);
+      content.classList.toggle('open');
     }
 
     function guardarDatos() {
@@ -435,7 +693,7 @@
       guardarDatos();
     }
 
-    async function sincronizarDolarVzlaAPI() {
+    async function sincronizarDolarVzlaAPI(mostrarAlerta = false) {
       try {
         var response = await fetch('https://rates.dolarvzla.com/bcv/current.json');
         var data = await response.json();
@@ -449,57 +707,45 @@
         }
         
         actualizarTasasManuales();
-        alert('¡Tasas oficiales BCV sincronizadas exitosamente!');
+        if (mostrarAlerta) alert('¡Tasas oficiales BCV sincronizadas!');
       } catch (error) {
-        alert('Error al conectar con la API de DolarVZLA. Revisa tu conexión.');
+        if (mostrarAlerta) alert('Error al conectar con BCV.');
       }
     }
 
-    async function sincronizarBinanceP2P() {
+    async function sincronizarBinanceP2P(mostrarAlerta = false) {
       var binanceUrl = 'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search';
-      var payload = {
-        asset: "USDT",
-        fiat: "VES",
-        tradeType: "BUY",
-        page: 1,
-        rows: 5,
-        payTypes: []
-      };
+      var payload = { asset: "USDT", fiat: "VES", tradeType: "BUY", page: 1, rows: 5, payTypes: [] };
 
       try {
-        // Intento 1: Proxy CORS directo hacia Binance P2P (como en la imagen número dos)
         var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(binanceUrl);
         var response = await fetch(proxyUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        
         var resData = await response.json();
         
         if (resData && resData.data && resData.data.length > 0) {
-          var sum = 0;
-          var count = 0;
+          var sum = 0, count = 0;
           resData.data.forEach(item => {
             if (item.adv && item.adv.price) {
               sum += parseFloat(item.adv.price);
               count++;
             }
           });
-          
           if (count > 0) {
             var promedioUsdt = sum / count;
             document.getElementById('input-tasa-usdt').value = promedioUsdt.toFixed(2);
             actualizarTasasManuales();
-            alert('¡Tasa USDT de Binance P2P obtenida exitosamente! Promedio top 5: ' + promedioUsdt.toFixed(2) + ' Bs');
+            if (mostrarAlerta) alert('¡Tasa Binance P2P sincronizada: ' + promedioUsdt.toFixed(2) + ' Bs');
             return;
           }
         }
       } catch (e) {
-        console.warn('Proxy directo Binance falló, usando API fallback...');
+        console.warn('Proxy alternativo...');
       }
 
-      // Intento 2 (Fallback): Endpoint de respaldo en caso de bloqueo estricto de IP/CORS por Binance
       try {
         var fallbackRes = await fetch('https://rates.dolarvzla.com/bcv/current.json');
         var fallbackData = await fallbackRes.json();
@@ -507,11 +753,8 @@
           var estUsdt = (parseFloat(fallbackData.current.usd) * 1.065).toFixed(2);
           document.getElementById('input-tasa-usdt').value = estUsdt;
           actualizarTasasManuales();
-          alert('Tasa USDT aproximada correctamente (+6.5% respecto a BCV).');
         }
-      } catch (err) {
-        alert('No se pudo conectar a los servidores de Binance. Ingresa la tasa USDT manualmente.');
-      }
+      } catch (err) {}
     }
 
     function switchTab(tabId, el) {
@@ -522,20 +765,24 @@
     }
 
     function seleccionarBancoComision(comision, nombreBanco, el) {
-      document.querySelectorAll('#tab-comisiones .bank-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#acc-bancos .bank-btn').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
       document.getElementById('com-porc-banco').value = comision;
       document.getElementById('banco-seleccionado-nombre').value = nombreBanco;
+      document.getElementById('label-banco-activo').innerText = nombreBanco.split(' ')[0] + ` (${comision}%) ▾`;
+      toggleAccordion('acc-bancos');
       actualizarResumenCanal();
       calcularComisiones(1);
       calcularArbitraje();
     }
 
     function seleccionarBinanceComision(comision, nombreBinance, el) {
-      document.querySelectorAll('#tab-comisiones .binance-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#acc-binance .binance-btn').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
       document.getElementById('com-porc-binance').value = comision;
       document.getElementById('binance-seleccionado-nombre').value = nombreBinance;
+      document.getElementById('label-binance-activo').innerText = nombreBinance.split(' ')[1] + ` (${comision}%) ▾`;
+      toggleAccordion('acc-binance');
       actualizarResumenCanal();
       calcularComisiones(1);
       calcularArbitraje();
@@ -632,18 +879,30 @@
     function calcularComisiones(modo) {
       var pBanco = parseFloat(document.getElementById('com-porc-banco').value) || 0;
       var pBinance = parseFloat(document.getElementById('com-porc-binance').value) || 0;
-      var factor = (1 - (pBanco / 100)) * (1 - (pBinance / 100));
+      var pPersonal = parseFloat(document.getElementById('com-porc-personal').value) || 0;
+
+      var factorSystem = (1 - (pBanco / 100)) * (1 - (pBinance / 100));
 
       var env = document.getElementById('com-envio-usd');
       var rec = document.getElementById('com-recibo-usdt');
 
       if (modo === 1) {
         var v = parseFloat(env.value) || 0;
-        rec.value = (v * factor).toFixed(2);
+        var netoUsdt = v * factorSystem;
+        rec.value = netoUsdt.toFixed(2);
+
+        // APLICACIÓN DE TERCERA COMISIÓN AL FINAL
+        var totalConPersonal = netoUsdt * (1 + (pPersonal / 100));
+        document.getElementById('com-res-total-personal').innerText = formato(totalConPersonal) + ' $';
       } else {
         var v = parseFloat(rec.value) || 0;
-        env.value = factor > 0 ? (v / factor).toFixed(2) : 0;
+        var brutoEnvio = factorSystem > 0 ? (v / factorSystem) : 0;
+        env.value = brutoEnvio.toFixed(2);
+
+        var totalConPersonal = v * (1 + (pPersonal / 100));
+        document.getElementById('com-res-total-personal').innerText = formato(totalConPersonal) + ' $';
       }
+
       actualizarResumenCanal();
       calcularMetaNeta();
     }
@@ -654,6 +913,7 @@
       var tVenta = parseFloat(document.getElementById('arb-tasa-venta').value) || tasaUSDT;
       var pBanco = parseFloat(document.getElementById('com-porc-banco').value) || 0;
       var pBinance = parseFloat(document.getElementById('com-porc-binance').value) || 0;
+      var pPersonal = parseFloat(document.getElementById('arb-com-personal').value) || 0;
 
       var factorComision = (1 - (pBanco / 100)) * (1 - (pBinance / 100));
       var tasaMinima = factorComision > 0 ? tCompra / factorComision : tCompra;
@@ -666,10 +926,11 @@
         
         var gananciaBs = bsFinales - bs;
         var gananciaUSDT = gananciaBs / tVenta;
-        var gananciaUSD = gananciaBs / tCompra;
+        
+        // CALCULO DE TERCERA COMISIÓN (MARGEN PERSONAL)
+        var gananciaUSD = (gananciaBs / tCompra) * (1 + (pPersonal / 100));
 
         var comisionesTotalesBs = bs - (usdtNetos * tCompra);
-
         var colorRes = gananciaBs >= 0 ? 'var(--neon-green)' : 'var(--danger-color)';
 
         document.getElementById('arb-res-final').innerText = formato(bsFinales) + ' Bs';
@@ -694,6 +955,7 @@
       var ganBs = document.getElementById('arb-res-ganancia-bs').innerText;
       var comBs = document.getElementById('arb-res-comision-bs').innerText;
       var canalActual = document.getElementById('resumen-canal-activo').innerText;
+      var pPersonal = document.getElementById('arb-com-personal').value || '0';
       var notaUsuario = document.getElementById('arb-nota').value || 'Arbitraje estándar';
 
       if (!bs || ganBs === '0,00 Bs') return;
@@ -701,7 +963,7 @@
       var item = {
         id: Date.now(),
         fecha: new Date().toLocaleDateString(),
-        detalle: `${canalActual} <br><span style="color:var(--text-muted);">${notaUsuario}</span>`,
+        detalle: `${canalActual} <br><span style="color:var(--neon-green);">+${pPersonal}% Mi Comisión</span><br><span style="color:var(--text-muted);">${notaUsuario}</span>`,
         inversion: bs + ' Bs',
         ganancia: ganBs,
         comision: comBs
@@ -711,7 +973,7 @@
       document.getElementById('arb-nota').value = '';
       renderHistorial();
       guardarDatos();
-      alert('¡Operación registrada con éxito en el historial!');
+      alert('¡Operación guardada exitosamente!');
     }
 
     function renderHistorial(filtro = '') {
@@ -721,10 +983,10 @@
         var tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${h.fecha}</td>
-          <td>${h.detalle} <div class="badge-info">Comisiones Totales: ${h.comision}</div></td>
+          <td>${h.detalle} <div class="status-badge" style="margin-top:4px;">Comisiones: ${h.comision}</div></td>
           <td>${h.inversion}</td>
           <td style="color:var(--neon-green); font-weight:bold;">${h.ganancia}</td>
-          <td><button class="btn-delete" onclick="eliminarHistorial(${h.id})">🗑️</button></td>
+          <td><button style="background:transparent; border:none; color:var(--danger-color); cursor:pointer;" onclick="eliminarHistorial(${h.id})">🗑️</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -762,6 +1024,8 @@
       });
       document.getElementById('com-porc-banco').value = '2.5';
       document.getElementById('com-porc-binance').value = '0.0';
+      document.getElementById('com-porc-personal').value = '0';
+      document.getElementById('arb-com-personal').value = '0';
       actualizarTasasManuales();
     }
   </script>
