@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1b4332">
-  <title>Kiosco Báscula POS Glass PWA</title>
+  <title>Kiosco Báscula POS Glass PWA Pro</title>
   <link rel="manifest" href="manifest.json">
   <script src="https://unpkg.com/@zxing/library@latest"></script>
   <style>
@@ -117,7 +117,7 @@
     .peso-display:hover { transform: scale(1.06); }
     .estado-peso { font-size: 0.75rem; font-weight: 800; color: #52b788; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .tasa-ticker { font-size: 0.85rem; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px; font-weight: 800; color: #fff; display: inline-block; margin-top: 2px; border: 1px solid rgba(255,255,255,0.25); }
+    .tasa-ticker { font-size: 0.85rem; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 12px; font-weight: 800; color: #fff; display: inline-block; margin-top: 2px; border: 1px solid rgba(255,255,255,0.25); cursor: pointer; }
 
     /* CUERPO */
     .contenedor-cuerpo { flex: 1; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; }
@@ -270,7 +270,7 @@
         <img id="img-logo-header" class="header-logo" src="https://cdn-icons-png.flaticon.com/512/1046/1046857.png" alt="Logo">
         <div>
           <h2 style="font-size: 1.15rem; font-weight:900; color:white;">BÁSCULA POS</h2>
-          <div class="tasa-ticker">BCV: <span id="tasa-display-header">--.--</span> Bs/$</div>
+          <div class="tasa-ticker" onclick="obtenerTasaBCVOnline()" title="Clic para actualizar tasa BCV">BCV: <span id="tasa-display-header">--.--</span> Bs/$ 🔄</div>
         </div>
       </div>
       
@@ -297,7 +297,7 @@
         <div class="buscador-container">
           <input type="text" class="input-busqueda" id="input-buscar" placeholder="🔍 Buscar producto..." oninput="buscarProductosDirecto()">
           <button class="btn-icon-search" id="btn-voz" onclick="iniciarReconocimientoVoz()" title="Buscar por voz">🎙️</button>
-          <button class="btn-icon-search" onclick="abrirEscanerCamara('kiosco')" title="Escanear código de barras (Autofocus)">📷</button>
+          <button class="btn-icon-search" onclick="abrirEscanerCamara('kiosco')" title="Escanear código de barras (F2)">📷</button>
         </div>
       </div>
 
@@ -330,7 +330,7 @@
     </div>
 
     <!-- CARRITO FLOTANTE -->
-    <button class="btn-carrito-flotante" id="btn-cart-float" onclick="abrirCarrito()">
+    <button class="btn-carrito-flotante" id="btn-cart-float" onclick="abrirCarrito()" title="Ver carrito (F4)">
       🛒
       <div class="badge-carrito" id="cant-carrito">0</div>
     </button>
@@ -441,7 +441,7 @@
           <input type="number" step="0.01" id="adm-tasa" placeholder="Ej: 36.50" style="flex:1; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); background:var(--card-bg); color:var(--text); font-weight:700;">
           <button class="btn-action" onclick="guardarTasaManual()" style="background:var(--primary); color:white; padding:10px 14px; font-size:0.9rem;">Guardar</button>
         </div>
-        <button id="btn-sincronizar" onclick="obtenerTasaBCVOnline()" style="margin-top:10px; font-size:0.85rem; background:none; border:none; color:var(--primary); text-decoration:underline; cursor:pointer; font-weight:800;">🔄 Sincronizar Tasa BCV (DolarApi)</button>
+        <button id="btn-sincronizar" onclick="obtenerTasaBCVOnline()" style="margin-top:10px; font-size:0.85rem; background:none; border:none; color:var(--primary); text-decoration:underline; cursor:pointer; font-weight:800;">🔄 Sincronizar Tasa BCV (DolarApi / Rates)</button>
       </div>
 
       <div style="background:rgba(0,0,0,0.04); padding:14px; border-radius:18px; margin-bottom:14px; border:1px solid rgba(0,0,0,0.08);">
@@ -671,6 +671,23 @@
       if (localStorage.getItem('bascula_modo_oscuro') === 'true') {
         document.body.classList.add('dark-mode');
       }
+
+      // REGISTRO DE ATAJOS TECLADO RÁPIDOS
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') {
+          e.preventDefault();
+          abrirEscanerCamara('kiosco');
+        } else if (e.key === 'F4') {
+          e.preventDefault();
+          abrirCarrito();
+        } else if (e.key === 'Escape') {
+          cerrarModal('modal-escaner');
+          cerrarModal('modal-confirmar');
+          cerrarModal('modal-carrito');
+          cerrarModal('modal-ticket');
+          cerrarModal('modal-admin');
+        }
+      });
     });
 
     window.addEventListener('focus', () => {
@@ -681,28 +698,34 @@
       const btn = document.getElementById('btn-sincronizar');
       if (btn) btn.innerText = "⏳ Consultando Tasa Al Momento...";
       try {
-        const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial', { cache: 'no-cache' });
-        if (!response.ok) throw new Error("Error HTTP: " + response.status);
-        const data = await response.json();
-        
-        let tasaAlMomento = data.promedio || data.precio;
-        if (tasaAlMomento && !isNaN(tasaAlMomento) && tasaAlMomento > 0) {
-          guardarTasaEnStorage(parseFloat(tasaAlMomento));
-        }
-      } catch (err) {
-        console.warn("Fallo en DolarApi, probando API secundaria...", err);
-        try {
-          const res2 = await fetch('https://pydolarvenezuela-api.vercel.app/api/v1/dollar?page=bcv');
-          const data2 = await res2.json();
-          let tasaRespaldo = data2.monedas?.usd?.price || data2.price;
-          if (tasaRespaldo && !isNaN(tasaRespaldo)) {
-            guardarTasaEnStorage(parseFloat(tasaRespaldo));
+        // ENDPOINT PRINCIPAL PREFERIDO
+        const resPrimary = await fetch('https://rates.dolarvzla.com/bcv/current.json', { cache: 'no-cache' });
+        if (resPrimary.ok) {
+          const dataPrimary = await resPrimary.json();
+          let tasaActual = dataPrimary.rate || dataPrimary.price || dataPrimary.promedio;
+          if (tasaActual && !isNaN(tasaActual) && tasaActual > 0) {
+            guardarTasaEnStorage(parseFloat(tasaActual));
+            return;
           }
-        } catch(e) {
+        }
+        throw new Error("Respuesta no válida del endpoint principal");
+      } catch (err) {
+        console.warn("Fallo en rates.dolarvzla.com, respaldando con DolarApi...", err);
+        try {
+          const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial', { cache: 'no-cache' });
+          if (!response.ok) throw new Error("Error HTTP: " + response.status);
+          const data = await response.json();
+          
+          let tasaAlMomento = data.promedio || data.precio;
+          if (tasaAlMomento && !isNaN(tasaAlMomento) && tasaAlMomento > 0) {
+            guardarTasaEnStorage(parseFloat(tasaAlMomento));
+            return;
+          }
+        } catch (e) {
           console.error("No se pudo obtener la tasa en vivo de ninguna API.", e);
         }
       } finally {
-        if (btn) btn.innerText = "🔄 Sincronizar Tasa BCV (DolarApi)";
+        if (btn) btn.innerText = "🔄 Sincronizar Tasa BCV (DolarApi / Rates)";
       }
     }
 
